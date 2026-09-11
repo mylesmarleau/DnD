@@ -149,6 +149,31 @@
   .adv-toggle button.active{background:var(--gold); color:#1b1712; border-color:var(--gold);}
   #importFile{display:none;}
   .hint{font-size:0.7rem; color:var(--muted); margin-top:2px;}
+  .action-econ{display:flex; gap:6px; flex-wrap:wrap;}
+  .action-econ .cond-tag{font-size:0.78rem; padding:5px 10px;}
+  .round-display{font-size:1.6rem; font-weight:bold; color:var(--gold); text-align:center;}
+  .steps-ref{font-size:0.78rem; color:var(--muted); margin:6px 0 0 0; padding-left:18px;}
+  .steps-ref li{margin-bottom:2px;}
+  .loglist{max-height:110px; overflow-y:auto; font-size:0.78rem; margin-top:6px;}
+  .loglist div{padding:3px 0; border-bottom:1px dashed #33291b; color:var(--muted);}
+  .loglist b{color:var(--text);}
+  .modal-overlay{
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);
+    z-index:200; align-items:center; justify-content:center; padding:16px;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal-box{
+    background:var(--panel); border:1px solid var(--gold); border-radius:10px;
+    padding:16px; max-width:460px; width:100%; max-height:90vh; overflow-y:auto;
+  }
+  .modal-box h2{margin-top:0;}
+  .radio-row{display:flex; gap:14px; align-items:center; margin:8px 0;}
+  .radio-row label{display:flex; gap:5px; align-items:center; font-size:0.85rem;}
+  .hp-preview{font-size:1.3rem; color:var(--gold); font-weight:bold; text-align:center; margin:6px 0;}
+  .resource-row{display:flex; gap:6px; margin-bottom:5px; align-items:center;}
+  .resource-row input.rname{flex:1;}
+  .resource-row input.rnum{width:48px; text-align:center;}
+  .resource-row select{width:90px;}
 </style>
 </head>
 <body>
@@ -193,6 +218,15 @@
         <div class="field"><label>XP</label><input id="f_xp" type="number" min="0"></div>
         <div class="field"><label>Prof. Bonus</label><input id="f_profBonus" type="text" readonly></div>
       </div>
+      <div class="row" style="margin-top:10px; align-items:center;">
+        <label class="small"><input type="checkbox" id="f_inspiration" class="checkbox-title"> Inspiration</label>
+        <div class="spacer"></div>
+        <button id="levelUpBtn" class="primary">Level Up</button>
+      </div>
+      <div id="levelLogWrap" style="display:none;">
+        <h3>Level History</h3>
+        <div class="loglist" id="levelLog"></div>
+      </div>
     </div>
 
     <div class="panel">
@@ -231,6 +265,47 @@
         <div class="field"><label>Hit Dice Total</label><input id="f_hitDiceTotal" type="number" min="0"></div>
         <div class="field"><label>Hit Dice Left</label><input id="f_hitDiceLeft" type="number" min="0"></div>
       </div>
+    </div>
+
+    <div class="panel">
+      <h2>Combat Tracker</h2>
+      <div class="row" style="justify-content:center; gap:20px;">
+        <div>
+          <div class="small" style="text-align:center;">Round</div>
+          <div class="round-display" id="roundDisplay">1</div>
+        </div>
+        <div class="field" style="max-width:110px;">
+          <label>Init. Bonus</label>
+          <input id="initBonusDisplay" readonly>
+        </div>
+      </div>
+      <div class="row" style="justify-content:center; margin-top:6px;">
+        <button id="rollInitBtn" class="primary">Roll Initiative</button>
+        <button id="nextRoundBtn">Next Round &rarr;</button>
+        <button id="resetCombatBtn" class="tiny-btn">Reset Combat</button>
+      </div>
+      <h3>This Turn</h3>
+      <div class="action-econ" id="actionEcon">
+        <span class="cond-tag" data-econ="action">Action</span>
+        <span class="cond-tag" data-econ="bonus">Bonus Action</span>
+        <span class="cond-tag" data-econ="reaction">Reaction</span>
+      </div>
+      <div class="row" style="margin-top:6px;">
+        <div class="field" style="max-width:100px;"><label>Movement used</label><input id="f_movementUsed" type="number" min="0"></div>
+        <div class="small" style="align-self:center;">of <span id="speedRef">30 ft</span></div>
+      </div>
+      <h3>Turn Sequence Reference</h3>
+      <ol class="steps-ref">
+        <li>Start of turn: resolve ongoing effects (poison, burning, concentration checks if you took damage, etc.)</li>
+        <li>Move up to your speed (before, during, or after your action)</li>
+        <li>Take an Action (Attack, Cast a Spell, Dash, Dodge, Help, Hide, Ready, Search, Use an Object, etc.)</li>
+        <li>Take a Bonus Action, if you have one available</li>
+        <li>Reactions can be used on other creatures' turns too (e.g. opportunity attacks, Shield)</li>
+        <li>End of turn: tick down effect durations, check ongoing conditions</li>
+      </ol>
+      <h3>Active Effects &amp; Ongoing Conditions</h3>
+      <div id="effectsList"></div>
+      <button id="addEffectBtn" class="tiny-btn">+ Add Effect</button>
     </div>
 
     <div class="panel">
@@ -332,6 +407,13 @@
     </div>
 
     <div class="panel">
+      <h2>Class Resources</h2>
+      <div class="small">Rage uses, Ki points, Sorcery Points, Bardic Inspiration, Superiority Dice, etc.</div>
+      <div id="resourcesList" style="margin-top:6px;"></div>
+      <button id="addResourceBtn">+ Add Resource</button>
+    </div>
+
+    <div class="panel">
       <h2>Equipment</h2>
       <h3>Currency</h3>
       <div class="currency-grid">
@@ -366,6 +448,32 @@
 </div>
 
 <footer>Autosaves to this browser. Use Export regularly to back up your character as a file.</footer>
+
+<div class="modal-overlay" id="levelUpModal">
+  <div class="modal-box">
+    <h2 id="levelUpTitle">Level Up</h2>
+    <div class="small" id="levelUpSubtitle"></div>
+
+    <h3>Hit Points</h3>
+    <div class="radio-row">
+      <label><input type="radio" name="hpMethod" id="hpMethodAvg" value="avg" checked> Take average</label>
+      <label><input type="radio" name="hpMethod" id="hpMethodRoll" value="roll"> Roll hit die</label>
+      <button id="rerollHpBtn" class="tiny-btn" style="display:none;">Reroll</button>
+    </div>
+    <div class="hp-preview" id="hpGainPreview"></div>
+
+    <h3>New Features / ASI / Feat</h3>
+    <div class="small">Check your class table for this level — note anything gained below (it will be added to Features &amp; Traits).</div>
+    <textarea id="levelUpNotes" placeholder="e.g. Ability Score Improvement: +2 STR, or 'Extra Attack'"></textarea>
+
+    <div class="small" style="margin-top:8px;">Reminder: update spell slots and class resources for the new level if needed.</div>
+
+    <div class="row" style="margin-top:14px; justify-content:flex-end;">
+      <button id="cancelLevelUpBtn">Cancel</button>
+      <button id="confirmLevelUpBtn" class="primary">Confirm Level Up</button>
+    </div>
+  </div>
+</div>
 
 <script>
 (function(){
@@ -428,11 +536,31 @@
       slots: slots,
       currency: {cp:0, sp:0, ep:0, gp:0, pp:0},
       inventory: [],
-      features: "", profs: "", notes: ""
+      features: "", profs: "", notes: "",
+      inspiration: false,
+      resources: [],
+      levelLog: [],
+      effects: [],
+      combat: {round:1, actionUsed:false, bonusUsed:false, reactionUsed:false, movementUsed:0}
     };
   }
 
   var db = { characters: [], activeId: null };
+
+  function hydrate(c){
+    var base = defaultCharacter(c.name);
+    Object.keys(base).forEach(function(key){
+      if(c[key] === undefined || c[key] === null) c[key] = base[key];
+    });
+    if(typeof c.combat !== "object") c.combat = base.combat;
+    ["actionUsed","bonusUsed","reactionUsed","movementUsed","round"].forEach(function(k){
+      if(c.combat[k] === undefined) c.combat[k] = base.combat[k];
+    });
+    if(!Array.isArray(c.resources)) c.resources = [];
+    if(!Array.isArray(c.levelLog)) c.levelLog = [];
+    if(!Array.isArray(c.effects)) c.effects = [];
+    return c;
+  }
 
   function load(){
     try{
@@ -441,6 +569,7 @@
         var parsed = JSON.parse(raw);
         if(parsed && parsed.characters && parsed.characters.length){
           db = parsed;
+          db.characters.forEach(hydrate);
           return;
         }
       }
@@ -474,7 +603,11 @@
    "f_concOn","f_concSpell","conditionsList","f_exhaustion","attacksList",
    "f_spellAbility","spellDC","spellAtk","slotsList","f_spellsKnown",
    "c_cp","c_sp","c_ep","c_gp","c_pp","inventoryList",
-   "f_features","f_profs","f_notes","diceLog","rollMod","rollCount"
+   "f_features","f_profs","f_notes","diceLog","rollMod","rollCount",
+   "f_inspiration","levelLogWrap","levelLog",
+   "roundDisplay","initBonusDisplay","actionEcon","f_movementUsed","speedRef","effectsList",
+   "resourcesList",
+   "levelUpModal","levelUpTitle","levelUpSubtitle","hpGainPreview","rerollHpBtn","levelUpNotes"
   ].forEach(function(id){ el[id] = document.getElementById(id); });
 
   var advMode = "normal"; // normal | adv | dis
@@ -626,6 +759,76 @@
     }
   }
 
+  function renderCombatTracker(c){
+    el.roundDisplay.textContent = c.combat.round;
+    var initMod = c.initManual !== "" && c.initManual !== undefined ? Number(c.initManual) : mod(c.abilities.dex);
+    el.initBonusDisplay.value = fmtMod(initMod);
+    el.speedRef.textContent = c.speed || "30 ft";
+    el.f_movementUsed.value = c.combat.movementUsed;
+    ["action","bonus","reaction"].forEach(function(k){
+      var tag = el.actionEcon.querySelector("[data-econ='" + k + "']");
+      var used = c.combat[k + "Used"];
+      tag.classList.toggle("active", !!used);
+    });
+  }
+
+  function renderEffects(c){
+    el.effectsList.innerHTML = "";
+    if(!c.effects.length){
+      el.effectsList.innerHTML = "<div class='small'>No active effects.</div>";
+    }
+    c.effects.forEach(function(fx, idx){
+      var row = document.createElement("div");
+      row.className = "list-row";
+      row.innerHTML =
+        "<input type='text' placeholder='Effect (e.g. Bless, Poisoned)' data-fx-name='" + idx + "' value='" + escapeAttr(fx.name) + "'>" +
+        "<input type='number' placeholder='Rds' class='narrow' data-fx-duration='" + idx + "' value='" + escapeAttr(fx.duration) + "'>" +
+        "<input type='text' placeholder='Notes' data-fx-notes='" + idx + "' value='" + escapeAttr(fx.notes) + "'>" +
+        "<button class='tiny-btn remove-btn' data-fx-remove='" + idx + "'>&times;</button>";
+      el.effectsList.appendChild(row);
+    });
+  }
+
+  function renderResources(c){
+    el.resourcesList.innerHTML = "";
+    if(!c.resources.length){
+      el.resourcesList.innerHTML = "<div class='small'>No class resources tracked yet.</div>";
+    }
+    c.resources.forEach(function(r, idx){
+      var row = document.createElement("div");
+      row.className = "resource-row";
+      row.innerHTML =
+        "<input type='text' class='rname' placeholder='Name (e.g. Rage)' data-res-name='" + idx + "' value='" + escapeAttr(r.name) + "'>" +
+        "<button class='tiny-btn' data-res-dec='" + idx + "'>-</button>" +
+        "<input type='number' class='rnum' data-res-current='" + idx + "' value='" + escapeAttr(r.current) + "'>" +
+        "<span class='small'>/</span>" +
+        "<input type='number' class='rnum' data-res-max='" + idx + "' value='" + escapeAttr(r.max) + "'>" +
+        "<button class='tiny-btn' data-res-inc='" + idx + "'>+</button>" +
+        "<select data-res-reset='" + idx + "'>" +
+          "<option value='none'" + (r.resetOn==="none"?" selected":"") + ">Manual</option>" +
+          "<option value='short'" + (r.resetOn==="short"?" selected":"") + ">Short Rest</option>" +
+          "<option value='long'" + (r.resetOn==="long"?" selected":"") + ">Long Rest</option>" +
+        "</select>" +
+        "<button class='tiny-btn remove-btn' data-res-remove='" + idx + "'>&times;</button>";
+      el.resourcesList.appendChild(row);
+    });
+  }
+
+  function renderLevelLog(c){
+    if(!c.levelLog.length){
+      el.levelLogWrap.style.display = "none";
+      return;
+    }
+    el.levelLogWrap.style.display = "block";
+    el.levelLog.innerHTML = "";
+    c.levelLog.slice().reverse().forEach(function(entry){
+      var div = document.createElement("div");
+      div.innerHTML = "<b>Level " + entry.level + "</b> (" + entry.date + "): +" + entry.hpGain + " HP" +
+        (entry.note ? " &mdash; " + escapeAttr(entry.note) : "");
+      el.levelLog.appendChild(div);
+    });
+  }
+
   function escapeAttr(v){
     if(v === undefined || v === null) return "";
     return String(v).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
@@ -666,6 +869,12 @@
     el.f_concSpell.value = c.concSpell;
     renderConditions(c);
     el.f_exhaustion.value = c.exhaustion;
+
+    el.f_inspiration.checked = c.inspiration;
+    renderCombatTracker(c);
+    renderEffects(c);
+    renderResources(c);
+    renderLevelLog(c);
 
     renderAttacks(c);
 
@@ -821,6 +1030,7 @@
           // ensure defaults for any missing fields
           var base = defaultCharacter(data.name);
           var merged = Object.assign({}, base, data);
+          merged = hydrate(merged);
           db.characters.push(merged);
           db.activeId = merged.id;
           save();
@@ -845,13 +1055,16 @@
       healed = parseInt(healed, 10) || 0;
       c.hitDiceLeft = Math.max(0, c.hitDiceLeft - hd);
       c.hpCurrent = Math.min(c.hpMax, c.hpCurrent + healed);
+      c.resources.forEach(function(r){
+        if(r.resetOn === "short") r.current = r.max;
+      });
       save();
       renderAll();
     });
 
     document.getElementById("longRestBtn").addEventListener("click", function(){
       var c = getActive();
-      if(!confirm("Long rest: restore HP to max, restore all spell slots, regain half hit dice, clear death saves and unconscious. Continue?")) return;
+      if(!confirm("Long rest: restore HP to max, restore all spell slots and class resources, regain half hit dice, clear death saves and unconscious. Continue?")) return;
       c.hpCurrent = c.hpMax;
       c.hpTemp = 0;
       c.deathSuccess = 0;
@@ -860,6 +1073,9 @@
       var regain = Math.max(1, Math.floor(c.hitDiceTotal / 2));
       c.hitDiceLeft = Math.min(c.hitDiceTotal, c.hitDiceLeft + regain);
       Object.keys(c.slots).forEach(function(lvl){ c.slots[lvl].used = 0; });
+      c.resources.forEach(function(r){
+        if(r.resetOn === "short" || r.resetOn === "long") r.current = r.max;
+      });
       if(c.exhaustion > 0) c.exhaustion -= 1;
       save();
       renderAll();
@@ -968,6 +1184,170 @@
     document.getElementById("advAdv").addEventListener("click", function(){ setAdvMode("adv"); });
     document.getElementById("advDis").addEventListener("click", function(){ setAdvMode("dis"); });
     document.getElementById("clearLogBtn").addEventListener("click", function(){ el.diceLog.innerHTML = ""; });
+
+    // inspiration
+    el.f_inspiration.addEventListener("change", function(){
+      var c = getActive(); c.inspiration = el.f_inspiration.checked; save();
+    });
+
+    // combat tracker
+    document.getElementById("rollInitBtn").addEventListener("click", function(){
+      var c = getActive();
+      var initMod = c.initManual !== "" && c.initManual !== undefined ? Number(c.initManual) : mod(c.abilities.dex);
+      doRoll(20, initMod, "Initiative");
+    });
+    document.getElementById("nextRoundBtn").addEventListener("click", function(){
+      var c = getActive();
+      c.combat.round += 1;
+      c.combat.actionUsed = false;
+      c.combat.bonusUsed = false;
+      c.combat.reactionUsed = false;
+      c.combat.movementUsed = 0;
+      c.effects.forEach(function(fx){
+        var d = parseInt(fx.duration, 10);
+        if(!isNaN(d) && d > 0) fx.duration = d - 1;
+      });
+      save(); renderAll();
+    });
+    document.getElementById("resetCombatBtn").addEventListener("click", function(){
+      var c = getActive();
+      c.combat.round = 1;
+      c.combat.actionUsed = false;
+      c.combat.bonusUsed = false;
+      c.combat.reactionUsed = false;
+      c.combat.movementUsed = 0;
+      save(); renderAll();
+    });
+    el.actionEcon.addEventListener("click", function(ev){
+      var t = ev.target;
+      if(t.dataset.econ){
+        var c = getActive();
+        var key = t.dataset.econ + "Used";
+        c.combat[key] = !c.combat[key];
+        save(); renderAll();
+      }
+    });
+    bindField(el.f_movementUsed, function(c,v){ c.combat.movementUsed = parseInt(v,10) || 0; });
+
+    // active effects
+    document.getElementById("addEffectBtn").addEventListener("click", function(){
+      var c = getActive();
+      c.effects.push({name:"", duration:"", notes:""});
+      save(); renderAll();
+    });
+    el.effectsList.addEventListener("input", function(ev){
+      var t = ev.target, c = getActive();
+      if(t.dataset.fxName !== undefined) c.effects[t.dataset.fxName].name = t.value;
+      else if(t.dataset.fxDuration !== undefined) c.effects[t.dataset.fxDuration].duration = t.value;
+      else if(t.dataset.fxNotes !== undefined) c.effects[t.dataset.fxNotes].notes = t.value;
+      else return;
+      save();
+    });
+    el.effectsList.addEventListener("click", function(ev){
+      var t = ev.target, c = getActive();
+      if(t.dataset.fxRemove !== undefined){
+        c.effects.splice(parseInt(t.dataset.fxRemove,10),1);
+        save(); renderAll();
+      }
+    });
+
+    // class resources
+    document.getElementById("addResourceBtn").addEventListener("click", function(){
+      var c = getActive();
+      c.resources.push({name:"", current:0, max:0, resetOn:"long"});
+      save(); renderAll();
+    });
+    el.resourcesList.addEventListener("input", function(ev){
+      var t = ev.target, c = getActive();
+      if(t.dataset.resName !== undefined) c.resources[t.dataset.resName].name = t.value;
+      else if(t.dataset.resCurrent !== undefined) c.resources[t.dataset.resCurrent].current = parseInt(t.value,10)||0;
+      else if(t.dataset.resMax !== undefined) c.resources[t.dataset.resMax].max = parseInt(t.value,10)||0;
+      else return;
+      save();
+    });
+    el.resourcesList.addEventListener("change", function(ev){
+      var t = ev.target, c = getActive();
+      if(t.dataset.resReset !== undefined){
+        c.resources[t.dataset.resReset].resetOn = t.value;
+        save();
+      }
+    });
+    el.resourcesList.addEventListener("click", function(ev){
+      var t = ev.target, c = getActive();
+      if(t.dataset.resRemove !== undefined){
+        c.resources.splice(parseInt(t.dataset.resRemove,10),1);
+        save(); renderAll();
+      } else if(t.dataset.resInc !== undefined){
+        var r1 = c.resources[parseInt(t.dataset.resInc,10)];
+        r1.current = Math.min(r1.max, r1.current + 1);
+        save(); renderAll();
+      } else if(t.dataset.resDec !== undefined){
+        var r2 = c.resources[parseInt(t.dataset.resDec,10)];
+        r2.current = Math.max(0, r2.current - 1);
+        save(); renderAll();
+      }
+    });
+
+    // level up modal
+    var pendingHpGain = 0;
+    function hitDieSides(c){ return parseInt((c.hitDiceType || "d8").slice(1), 10) || 8; }
+    function averageHpGain(c){
+      var sides = hitDieSides(c);
+      return Math.max(1, Math.floor(sides/2) + 1 + mod(c.abilities.con));
+    }
+    function rolledHpGain(c){
+      var sides = hitDieSides(c);
+      return Math.max(1, rollDie(sides) + mod(c.abilities.con));
+    }
+    function refreshHpPreview(){
+      var c = getActive();
+      var useRoll = document.getElementById("hpMethodRoll").checked;
+      el.rerollHpBtn.style.display = useRoll ? "inline-block" : "none";
+      if(useRoll){
+        if(!pendingHpGain) pendingHpGain = rolledHpGain(c);
+      } else {
+        pendingHpGain = averageHpGain(c);
+      }
+      el.hpGainPreview.textContent = "+" + pendingHpGain + " HP (max " + (c.hpMax + pendingHpGain) + ")";
+    }
+    document.getElementById("levelUpBtn").addEventListener("click", function(){
+      var c = getActive();
+      if(c.level >= 20){ alert("Already at max level (20)."); return; }
+      el.levelUpTitle.textContent = "Level Up: " + c.level + " → " + (c.level + 1);
+      el.levelUpSubtitle.textContent = "New proficiency bonus: " + fmtMod(profBonusForLevel(c.level + 1));
+      document.getElementById("hpMethodAvg").checked = true;
+      pendingHpGain = 0;
+      el.levelUpNotes.value = "";
+      refreshHpPreview();
+      el.levelUpModal.classList.add("open");
+    });
+    document.getElementById("hpMethodAvg").addEventListener("change", refreshHpPreview);
+    document.getElementById("hpMethodRoll").addEventListener("change", function(){ pendingHpGain = 0; refreshHpPreview(); });
+    el.rerollHpBtn.addEventListener("click", function(){
+      var c = getActive();
+      pendingHpGain = rolledHpGain(c);
+      refreshHpPreview();
+    });
+    document.getElementById("cancelLevelUpBtn").addEventListener("click", function(){
+      el.levelUpModal.classList.remove("open");
+    });
+    document.getElementById("confirmLevelUpBtn").addEventListener("click", function(){
+      var c = getActive();
+      var newLevel = c.level + 1;
+      c.level = newLevel;
+      c.hpMax += pendingHpGain;
+      c.hpCurrent += pendingHpGain;
+      c.hitDiceTotal += 1;
+      c.hitDiceLeft += 1;
+      var note = el.levelUpNotes.value.trim();
+      if(note){
+        c.features = (c.features ? c.features + "\n\n" : "") + "Level " + newLevel + ": " + note;
+      }
+      c.levelLog.push({level:newLevel, hpGain:pendingHpGain, date:new Date().toLocaleDateString(), note:note});
+      el.levelUpModal.classList.remove("open");
+      save();
+      renderAll();
+    });
   }
 
   function applyDamage(c, amt){

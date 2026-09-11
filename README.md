@@ -10,7 +10,7 @@ Open `index.html` in any browser (double-click the file, or host it — e.g. wit
 
 ## Features
 
-- Character info: name, class, level, race, background, alignment, XP, proficiency bonus (auto-calculated)
+- Character info: name, class, level, race, background, alignment, XP, proficiency bonus (auto-calculated), inspiration tracker
 - Ability scores with auto-computed modifiers, and one-click ability checks
 - Saving throws and all 18 skills with proficiency/expertise toggles, auto-computed bonuses, and one-click rolls
 - Passive Perception (auto-computed)
@@ -18,11 +18,25 @@ Open `index.html` in any browser (double-click the file, or host it — e.g. wit
 - HP tracker with quick damage/heal buttons (temp HP is consumed first), death save pips, concentration tracker, and a condition/exhaustion tracker
 - Attacks & Spellcasting list with a "Roll" button per attack
 - Spellcasting: save DC and attack bonus (auto-computed), spell slots by level with click-to-mark-used pips, and a free-text spell list
+- Class Resources tracker (Rage, Ki, Sorcery Points, Bardic Inspiration, etc.) with a reset rule per resource (manual / short rest / long rest)
 - Equipment: currency (CP/SP/EP/GP/PP) and an inventory list
 - Features & Traits, Proficiencies & Languages, and Personality/Notes sections
 - Built-in dice roller (d4–d100, multiple dice, modifiers, advantage/disadvantage) with a roll log
-- Short Rest / Long Rest buttons that reset HP, hit dice, and spell slots per the 5e rules
+- Short Rest / Long Rest buttons that reset HP, hit dice, spell slots, and resources per the 5e rules
 - Manage multiple characters (New / Duplicate / Delete / switch), all stored locally in your browser
+
+### Level Up system
+
+Click **Level Up** to walk through leveling up: choose to take the average HP gain or roll your hit die (with a reroll option), note any new features/ASI/feat gained (auto-appended to Features & Traits), and confirm. This updates your level, proficiency bonus, HP max/current, and hit dice, and logs the level-up in a **Level History** list on the Character panel.
+
+### Combat Tracker
+
+A dedicated panel for running your turns at the table:
+- Round counter with **Next Round** (resets your action economy and ticks down active effect durations) and **Reset Combat**
+- **Roll Initiative** button using your DEX modifier (or manual initiative bonus if set)
+- Action / Bonus Action / Reaction toggles that reset automatically each round, plus a movement-used tracker
+- A turn sequence reference (move, action, bonus action, reactions, end-of-turn effects) so you don't miss a step
+- An Active Effects list for ongoing conditions/buffs with a rounds-remaining counter that counts down as you advance rounds
 
 ## Backing up / moving between devices
 
