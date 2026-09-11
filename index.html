@@ -399,11 +399,48 @@
         </div>
         <div class="field"><label>Save DC</label><input id="spellDC" readonly></div>
         <div class="field"><label>Attack Bonus</label><input id="spellAtk" readonly></div>
+        <div class="field"><label>Spells Prepared</label><input id="spellPrepared" readonly></div>
       </div>
       <h3>Spell Slots</h3>
       <div id="slotsList"></div>
       <h3>Cantrips &amp; Known Spells</h3>
       <textarea id="f_spellsKnown" placeholder="List cantrips and prepared/known spells here..."></textarea>
+    </div>
+
+    <div class="panel">
+      <h2>Infusions &amp; Attunement</h2>
+      <h3>Known Infusions <span class="small">(max known: <b id="infusionsKnownMax">0</b>)</span></h3>
+      <textarea id="f_infusionsKnown" placeholder="e.g. Enhanced Weapon, Homunculus Servant, Repeating Shot, Enhanced Defense..."></textarea>
+      <h3>Infused Items <span class="small">(<span id="infusedItemsCount">0</span> / <span id="infusedItemsMax">0</span>)</span></h3>
+      <div id="infusedItemsList"></div>
+      <button id="addInfusedItemBtn" class="tiny-btn">+ Add Infused Item</button>
+      <h3>Attunement <span class="small">(<span id="attunementCount">0</span> / <input id="f_attunementMax" type="number" min="0" style="width:40px;"> )</span></h3>
+      <div class="small">Base 3 slots; Artificers can attune to 2 more, but only items they infused themselves.</div>
+      <div id="attunementList" style="margin-top:6px;"></div>
+      <button id="addAttunementBtn" class="tiny-btn">+ Add Attuned Item</button>
+    </div>
+
+    <div class="panel">
+      <h2>Companion / Construct</h2>
+      <div class="small">Steel Defender (Battle Smith), Eldritch Cannon (Artillerist), or Homunculus Servant.</div>
+      <div class="row" style="margin-top:6px;">
+        <div class="field grow"><label>Name</label><input id="f_compName" type="text"></div>
+        <div class="field"><label>Type</label><input id="f_compType" type="text" placeholder="Steel Defender..."></div>
+      </div>
+      <div class="row" style="margin-top:6px;">
+        <div class="field"><label>AC</label><input id="f_compAC" type="number"></div>
+        <div class="field"><label>Speed</label><input id="f_compSpeed" type="text" placeholder="40 ft"></div>
+      </div>
+      <div class="row" style="margin-top:6px;">
+        <div class="field"><label>HP Max</label><input id="f_compHpMax" type="number"></div>
+        <div class="field"><label>HP Current</label><input id="f_compHpCurrent" type="number"></div>
+      </div>
+      <div class="row" style="margin-top:6px;">
+        <div class="field"><label>Attack Bonus</label><input id="f_compAtk" type="text" placeholder="+6"></div>
+        <div class="field grow"><label>Damage</label><input id="f_compDamage" type="text" placeholder="1d8+4 force"></div>
+        <button id="rollCompAtkBtn" class="tiny-btn">Roll</button>
+      </div>
+      <textarea id="f_compNotes" placeholder="Special abilities, reactions (e.g. Deflect Attack, Repair), commands..."></textarea>
     </div>
 
     <div class="panel">
@@ -511,6 +548,18 @@
   ];
   var CONDITIONS = ["Blinded","Charmed","Deafened","Frightened","Grappled","Incapacitated",
     "Invisible","Paralyzed","Petrified","Poisoned","Prone","Restrained","Stunned","Unconscious"];
+  var INFUSION_TABLE = [
+    {lvl:2, known:4, items:2},
+    {lvl:6, known:6, items:3},
+    {lvl:10, known:8, items:4},
+    {lvl:14, known:10, items:5},
+    {lvl:18, known:12, items:6}
+  ];
+  function infusionLimits(level){
+    var result = {known:0, items:0};
+    INFUSION_TABLE.forEach(function(row){ if(level >= row.lvl) result = {known:row.known, items:row.items}; });
+    return result;
+  }
 
   function defaultCharacter(name){
     var abilities = {}, saves = {}, skills = {};
@@ -541,7 +590,12 @@
       resources: [],
       levelLog: [],
       effects: [],
-      combat: {round:1, actionUsed:false, bonusUsed:false, reactionUsed:false, movementUsed:0}
+      combat: {round:1, actionUsed:false, bonusUsed:false, reactionUsed:false, movementUsed:0},
+      infusionsKnown: "",
+      infusedItems: [],
+      attunement: [],
+      attunementMax: 3,
+      companion: {name:"", type:"", ac:"", speed:"", hpMax:0, hpCurrent:0, atk:"", damage:"", notes:""}
     };
   }
 
@@ -559,6 +613,9 @@
     if(!Array.isArray(c.resources)) c.resources = [];
     if(!Array.isArray(c.levelLog)) c.levelLog = [];
     if(!Array.isArray(c.effects)) c.effects = [];
+    if(!Array.isArray(c.infusedItems)) c.infusedItems = [];
+    if(!Array.isArray(c.attunement)) c.attunement = [];
+    if(typeof c.companion !== "object" || !c.companion) c.companion = base.companion;
     return c;
   }
 
@@ -601,7 +658,10 @@
    "f_ac","f_initManual","f_speed","f_hitDiceType","f_hitDiceTotal","f_hitDiceLeft",
    "f_hpMax","f_hpCurrent","f_hpTemp","dmgAmount","deathSuccess","deathFail",
    "f_concOn","f_concSpell","conditionsList","f_exhaustion","attacksList",
-   "f_spellAbility","spellDC","spellAtk","slotsList","f_spellsKnown",
+   "f_spellAbility","spellDC","spellAtk","spellPrepared","slotsList","f_spellsKnown",
+   "infusionsKnownMax","f_infusionsKnown","infusedItemsCount","infusedItemsMax","infusedItemsList",
+   "attunementCount","f_attunementMax","attunementList",
+   "f_compName","f_compType","f_compAC","f_compSpeed","f_compHpMax","f_compHpCurrent","f_compAtk","f_compDamage","f_compNotes",
    "c_cp","c_sp","c_ep","c_gp","c_pp","inventoryList",
    "f_features","f_profs","f_notes","diceLog","rollMod","rollCount",
    "f_inspiration","levelLogWrap","levelLog",
@@ -814,6 +874,57 @@
     });
   }
 
+  function renderInfusions(c){
+    var limits = infusionLimits(c.level);
+    el.infusionsKnownMax.textContent = limits.known;
+    el.f_infusionsKnown.value = c.infusionsKnown;
+
+    el.infusedItemsCount.textContent = c.infusedItems.length;
+    el.infusedItemsMax.textContent = limits.items;
+    el.infusedItemsList.innerHTML = "";
+    if(!c.infusedItems.length){
+      el.infusedItemsList.innerHTML = "<div class='small'>No infused items yet.</div>";
+    }
+    c.infusedItems.forEach(function(item, idx){
+      var row = document.createElement("div");
+      row.className = "list-row";
+      row.innerHTML =
+        "<input type='text' placeholder='Item' data-inf-name='" + idx + "' value='" + escapeAttr(item.name) + "'>" +
+        "<input type='text' placeholder='Infusion' data-inf-type='" + idx + "' value='" + escapeAttr(item.infusion) + "'>" +
+        "<input type='text' placeholder='Notes' data-inf-notes='" + idx + "' value='" + escapeAttr(item.notes) + "'>" +
+        "<button class='tiny-btn remove-btn' data-inf-remove='" + idx + "'>&times;</button>";
+      el.infusedItemsList.appendChild(row);
+    });
+
+    el.attunementCount.textContent = c.attunement.length;
+    el.f_attunementMax.value = c.attunementMax;
+    el.attunementList.innerHTML = "";
+    if(!c.attunement.length){
+      el.attunementList.innerHTML = "<div class='small'>No attuned items yet.</div>";
+    }
+    c.attunement.forEach(function(item, idx){
+      var row = document.createElement("div");
+      row.className = "list-row";
+      row.innerHTML =
+        "<input type='text' placeholder='Item' data-atn-name='" + idx + "' value='" + escapeAttr(item.name) + "'>" +
+        "<input type='text' placeholder='Notes' data-atn-notes='" + idx + "' value='" + escapeAttr(item.notes) + "'>" +
+        "<button class='tiny-btn remove-btn' data-atn-remove='" + idx + "'>&times;</button>";
+      el.attunementList.appendChild(row);
+    });
+  }
+
+  function renderCompanion(c){
+    el.f_compName.value = c.companion.name;
+    el.f_compType.value = c.companion.type;
+    el.f_compAC.value = c.companion.ac;
+    el.f_compSpeed.value = c.companion.speed;
+    el.f_compHpMax.value = c.companion.hpMax;
+    el.f_compHpCurrent.value = c.companion.hpCurrent;
+    el.f_compAtk.value = c.companion.atk;
+    el.f_compDamage.value = c.companion.damage;
+    el.f_compNotes.value = c.companion.notes;
+  }
+
   function renderLevelLog(c){
     if(!c.levelLog.length){
       el.levelLogWrap.style.display = "none";
@@ -883,12 +994,17 @@
     if(c.spellAbility){
       el.spellDC.value = 8 + pb + mod(c.abilities[c.spellAbility]);
       el.spellAtk.value = fmtMod(pb + mod(c.abilities[c.spellAbility]));
+      el.spellPrepared.value = Math.max(1, Math.floor(c.level / 2) + mod(c.abilities[c.spellAbility]));
     } else {
       el.spellDC.value = "";
       el.spellAtk.value = "";
+      el.spellPrepared.value = "";
     }
     renderSlots(c);
     el.f_spellsKnown.value = c.spellsKnown;
+
+    renderInfusions(c);
+    renderCompanion(c);
 
     el.c_cp.value = c.currency.cp;
     el.c_sp.value = c.currency.sp;
@@ -1122,6 +1238,67 @@
     bindField(el.f_spellsKnown, function(c,v){ c.spellsKnown = v; });
     el.f_spellAbility.addEventListener("change", function(){
       var c = getActive(); c.spellAbility = el.f_spellAbility.value; save(); renderAll();
+    });
+
+    // infusions & attunement
+    bindField(el.f_infusionsKnown, function(c,v){ c.infusionsKnown = v; });
+    bindField(el.f_attunementMax, function(c,v){ c.attunementMax = Math.max(0, parseInt(v,10)||0); });
+
+    document.getElementById("addInfusedItemBtn").addEventListener("click", function(){
+      var c = getActive();
+      c.infusedItems.push({name:"", infusion:"", notes:""});
+      save(); renderAll();
+    });
+    el.infusedItemsList.addEventListener("input", function(ev){
+      var t = ev.target, c = getActive();
+      if(t.dataset.infName !== undefined) c.infusedItems[t.dataset.infName].name = t.value;
+      else if(t.dataset.infType !== undefined) c.infusedItems[t.dataset.infType].infusion = t.value;
+      else if(t.dataset.infNotes !== undefined) c.infusedItems[t.dataset.infNotes].notes = t.value;
+      else return;
+      save();
+    });
+    el.infusedItemsList.addEventListener("click", function(ev){
+      var t = ev.target, c = getActive();
+      if(t.dataset.infRemove !== undefined){
+        c.infusedItems.splice(parseInt(t.dataset.infRemove,10),1);
+        save(); renderAll();
+      }
+    });
+
+    document.getElementById("addAttunementBtn").addEventListener("click", function(){
+      var c = getActive();
+      c.attunement.push({name:"", notes:""});
+      save(); renderAll();
+    });
+    el.attunementList.addEventListener("input", function(ev){
+      var t = ev.target, c = getActive();
+      if(t.dataset.atnName !== undefined) c.attunement[t.dataset.atnName].name = t.value;
+      else if(t.dataset.atnNotes !== undefined) c.attunement[t.dataset.atnNotes].notes = t.value;
+      else return;
+      save();
+    });
+    el.attunementList.addEventListener("click", function(ev){
+      var t = ev.target, c = getActive();
+      if(t.dataset.atnRemove !== undefined){
+        c.attunement.splice(parseInt(t.dataset.atnRemove,10),1);
+        save(); renderAll();
+      }
+    });
+
+    // companion / construct
+    bindField(el.f_compName, function(c,v){ c.companion.name = v; });
+    bindField(el.f_compType, function(c,v){ c.companion.type = v; });
+    bindField(el.f_compAC, function(c,v){ c.companion.ac = parseInt(v,10)||0; });
+    bindField(el.f_compSpeed, function(c,v){ c.companion.speed = v; });
+    bindField(el.f_compHpMax, function(c,v){ c.companion.hpMax = parseInt(v,10)||0; });
+    bindField(el.f_compHpCurrent, function(c,v){ c.companion.hpCurrent = parseInt(v,10)||0; });
+    bindField(el.f_compAtk, function(c,v){ c.companion.atk = v; });
+    bindField(el.f_compDamage, function(c,v){ c.companion.damage = v; });
+    bindField(el.f_compNotes, function(c,v){ c.companion.notes = v; });
+    document.getElementById("rollCompAtkBtn").addEventListener("click", function(){
+      var c = getActive();
+      var bonusNum = parseInt((c.companion.atk||"0").replace(/[^\-0-9]/g,""),10) || 0;
+      doRoll(20, bonusNum, (c.companion.name || "Companion") + " (to-hit)");
     });
 
     ["c_cp","c_sp","c_ep","c_gp","c_pp"].forEach(function(id){

@@ -17,7 +17,7 @@ Open `index.html` in any browser (double-click the file, or host it — e.g. wit
 - Combat panel: AC, initiative, speed, hit dice
 - HP tracker with quick damage/heal buttons (temp HP is consumed first), death save pips, concentration tracker, and a condition/exhaustion tracker
 - Attacks & Spellcasting list with a "Roll" button per attack
-- Spellcasting: save DC and attack bonus (auto-computed), spell slots by level with click-to-mark-used pips, and a free-text spell list
+- Spellcasting: save DC, attack bonus, and spells-prepared count (all auto-computed), spell slots by level with click-to-mark-used pips, and a free-text spell list
 - Class Resources tracker (Rage, Ki, Sorcery Points, Bardic Inspiration, etc.) with a reset rule per resource (manual / short rest / long rest)
 - Equipment: currency (CP/SP/EP/GP/PP) and an inventory list
 - Features & Traits, Proficiencies & Languages, and Personality/Notes sections
@@ -28,6 +28,13 @@ Open `index.html` in any browser (double-click the file, or host it — e.g. wit
 ### Level Up system
 
 Click **Level Up** to walk through leveling up: choose to take the average HP gain or roll your hit die (with a reroll option), note any new features/ASI/feat gained (auto-appended to Features & Traits), and confirm. This updates your level, proficiency bonus, HP max/current, and hit dice, and logs the level-up in a **Level History** list on the Character panel.
+
+### Artificer support
+
+- **Infusions & Attunement panel**: known infusions list with the max-known count auto-computed from your level, an infused-items list capped by level (2/3/4/5/6 at levels 2/6/10/14/18), and an attunement tracker with an editable max slots (base 3, +2 more if attuning to your own infusions) — separate from the max infused-items count since not every infusion needs attunement.
+- **Spells Prepared**: auto-computed (½ level, rounded down, + spellcasting ability modifier, minimum 1) next to Save DC and Attack Bonus.
+- **Companion / Construct panel**: a mini stat block for a Steel Defender, Eldritch Cannon, or Homunculus Servant — AC, speed, its own HP tracker, attack bonus/damage with a roll button, and a notes field for special reactions like Deflect Attack or Repair.
+- **Class Resources** doubles as a tracker for Infuse Item uses (if you track them separately), Flash of Genius, or any subclass-specific resource, with per-resource short/long rest reset rules.
 
 ### Combat Tracker
 
