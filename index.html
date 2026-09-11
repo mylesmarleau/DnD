@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>D&D Character Manager</title>
+<style>
+  :root{
+    --bg:#1b1712;
+    --panel:#251f18;
+    --panel2:#2c251b;
+    --border:#4a3f2c;
+    --text:#f1e6cf;
+    --muted:#b8a988;
+    --accent:#c0392b;
+    --accent2:#8b1a1a;
+    --good:#4c8c4a;
+    --gold:#d4af37;
+    --input-bg:#171310;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    padding-bottom:40px;
+  }
+  h1,h2,h3{margin:0 0 8px 0; font-family:Georgia,'Times New Roman',serif; color:var(--gold);}
+  h1{font-size:1.4rem;}
+  h2{font-size:1.05rem; border-bottom:1px solid var(--border); padding-bottom:4px;}
+  h3{font-size:0.9rem; color:var(--muted); margin-top:10px;}
+  input, textarea, select{
+    background:var(--input-bg);
+    color:var(--text);
+    border:1px solid var(--border);
+    border-radius:4px;
+    padding:4px 6px;
+    font-size:0.9rem;
+    font-family:inherit;
+  }
+  input:focus, textarea:focus, select:focus{outline:1px solid var(--gold);}
+  button{
+    background:var(--panel2);
+    color:var(--text);
+    border:1px solid var(--border);
+    border-radius:5px;
+    padding:5px 10px;
+    cursor:pointer;
+    font-size:0.85rem;
+  }
+  button:hover{border-color:var(--gold); color:var(--gold);}
+  button.primary{background:var(--accent2); border-color:var(--accent);}
+  button.primary:hover{color:#fff;}
+  button:active{transform:translateY(1px);}
+  .topbar{
+    background:var(--panel);
+    border-bottom:2px solid var(--gold);
+    padding:10px 14px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    align-items:center;
+    position:sticky;
+    top:0;
+    z-index:50;
+  }
+  .topbar select{max-width:160px;}
+  .topbar .spacer{flex:1;}
+  .container{
+    max-width:1300px;
+    margin:14px auto;
+    padding:0 12px;
+    display:grid;
+    grid-template-columns:1fr;
+    gap:12px;
+  }
+  @media(min-width:900px){
+    .container{grid-template-columns:1fr 1.3fr 1fr;}
+  }
+  .col{display:flex; flex-direction:column; gap:12px;}
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:12px;
+  }
+  .row{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
+  .field{display:flex; flex-direction:column; gap:2px; flex:1; min-width:70px;}
+  .field label{font-size:0.68rem; text-transform:uppercase; color:var(--muted); letter-spacing:0.03em;}
+  .field input, .field select{width:100%;}
+  .grid6{display:grid; grid-template-columns:repeat(2,1fr); gap:8px;}
+  @media(min-width:420px){.grid6{grid-template-columns:repeat(3,1fr);}}
+  .ability-box{
+    background:var(--panel2);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:8px;
+    text-align:center;
+  }
+  .ability-box h3{margin:0; font-size:0.75rem;}
+  .ability-box .mod{font-size:1.6rem; font-weight:bold; color:var(--gold); margin:2px 0;}
+  .ability-box input{width:55px; text-align:center; margin-top:2px;}
+  .ability-box .rollbtn{margin-top:4px; width:100%; font-size:0.7rem; padding:3px;}
+  table{width:100%; border-collapse:collapse; font-size:0.85rem;}
+  th,td{border-bottom:1px solid var(--border); padding:4px 3px; text-align:left;}
+  th{color:var(--muted); font-size:0.7rem; text-transform:uppercase;}
+  .skill-row{display:flex; align-items:center; gap:6px; padding:3px 0; border-bottom:1px solid #33291b; font-size:0.85rem;}
+  .skill-row .mod{width:34px; text-align:right; font-weight:bold; color:var(--gold);}
+  .skill-row .name{flex:1;}
+  .skill-row .ab{color:var(--muted); font-size:0.7rem; width:26px;}
+  .skill-row button{padding:2px 7px; font-size:0.72rem;}
+  .checkbox-title{width:14px; height:14px;}
+  .hp-controls{display:flex; gap:6px; align-items:center; justify-content:center;}
+  .hp-controls input{width:60px; text-align:center; font-size:1.1rem;}
+  .hp-big{font-size:2rem; text-align:center; font-weight:bold; color:var(--gold);}
+  .pip-row{display:flex; gap:6px; flex-wrap:wrap;}
+  .pip{width:16px; height:16px; border:1px solid var(--gold); border-radius:50%; cursor:pointer; display:inline-block;}
+  .pip.filled{background:var(--gold);}
+  .conditions{display:flex; flex-wrap:wrap; gap:5px;}
+  .cond-tag{
+    font-size:0.72rem; padding:3px 7px; border:1px solid var(--border); border-radius:12px;
+    cursor:pointer; user-select:none; color:var(--muted);
+  }
+  .cond-tag.active{background:var(--accent2); border-color:var(--accent); color:#fff;}
+  textarea{width:100%; min-height:70px; resize:vertical;}
+  .list-row{display:flex; gap:6px; margin-bottom:5px; align-items:center;}
+  .list-row input{flex:1;}
+  .list-row input.narrow{flex:0 0 55px;}
+  .small{font-size:0.75rem; color:var(--muted);}
+  .dice-log{
+    max-height:130px; overflow-y:auto; font-size:0.8rem; background:var(--input-bg);
+    border:1px solid var(--border); border-radius:5px; padding:6px; margin-top:6px;
+  }
+  .dice-log div{padding:2px 0; border-bottom:1px dashed #33291b;}
+  .dice-log .critgood{color:var(--good); font-weight:bold;}
+  .dice-log .critbad{color:var(--accent);font-weight:bold;}
+  .flexwrap{display:flex; flex-wrap:wrap; gap:6px;}
+  .death-row{display:flex; gap:14px; justify-content:center;}
+  .death-row .grp{text-align:center;}
+  .grow{flex:1;}
+  .tiny-btn{padding:2px 6px; font-size:0.7rem;}
+  .remove-btn{color:var(--accent); border-color:var(--accent2);}
+  .currency-grid{display:grid; grid-template-columns:repeat(5,1fr); gap:6px;}
+  .currency-grid .field label{text-align:center;}
+  .currency-grid input{text-align:center;}
+  footer{text-align:center; color:var(--muted); font-size:0.75rem; margin-top:20px;}
+  .adv-toggle{display:flex; gap:4px;}
+  .adv-toggle button.active{background:var(--gold); color:#1b1712; border-color:var(--gold);}
+  #importFile{display:none;}
+  .hint{font-size:0.7rem; color:var(--muted); margin-top:2px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>&#9876; D&amp;D Manager</h1>
+  <select id="charSelect"></select>
+  <button id="newCharBtn">New</button>
+  <button id="dupCharBtn">Duplicate</button>
+  <button id="deleteCharBtn" class="remove-btn">Delete</button>
+  <div class="spacer"></div>
+  <button id="shortRestBtn">Short Rest</button>
+  <button id="longRestBtn" class="primary">Long Rest</button>
+  <button id="exportBtn">Export</button>
+  <button id="importBtn">Import</button>
+  <input type="file" id="importFile" accept="application/json">
+</div>
+
+<div class="container">
+
+  <!-- LEFT COLUMN -->
+  <div class="col">
+
+    <div class="panel">
+      <h2>Character</h2>
+      <div class="row">
+        <div class="field grow"><label>Name</label><input id="f_name" type="text"></div>
+      </div>
+      <div class="row" style="margin-top:6px;">
+        <div class="field"><label>Class</label><input id="f_class" type="text"></div>
+        <div class="field"><label>Level</label><input id="f_level" type="number" min="1" max="20" value="1"></div>
+      </div>
+      <div class="row" style="margin-top:6px;">
+        <div class="field"><label>Race</label><input id="f_race" type="text"></div>
+        <div class="field"><label>Background</label><input id="f_background" type="text"></div>
+      </div>
+      <div class="row" style="margin-top:6px;">
+        <div class="field"><label>Alignment</label><input id="f_alignment" type="text"></div>
+        <div class="field"><label>Player</label><input id="f_player" type="text"></div>
+      </div>
+      <div class="row" style="margin-top:6px;">
+        <div class="field"><label>XP</label><input id="f_xp" type="number" min="0"></div>
+        <div class="field"><label>Prof. Bonus</label><input id="f_profBonus" type="text" readonly></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Ability Scores</h2>
+      <div class="grid6" id="abilityGrid"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Saving Throws</h2>
+      <div id="savesList"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Skills <span class="small">(passive perception: <b id="passivePerception">10</b>)</span></h2>
+      <div id="skillsList"></div>
+    </div>
+
+  </div>
+
+  <!-- MIDDLE COLUMN -->
+  <div class="col">
+
+    <div class="panel">
+      <h2>Combat</h2>
+      <div class="row">
+        <div class="field"><label>Armor Class</label><input id="f_ac" type="number"></div>
+        <div class="field"><label>Initiative</label><input id="f_initManual" type="number" placeholder="auto"></div>
+        <div class="field"><label>Speed</label><input id="f_speed" type="text" placeholder="30 ft"></div>
+      </div>
+      <div class="row" style="margin-top:8px;">
+        <div class="field"><label>Hit Dice Type</label>
+          <select id="f_hitDiceType">
+            <option>d6</option><option>d8</option><option>d10</option><option>d12</option>
+          </select>
+        </div>
+        <div class="field"><label>Hit Dice Total</label><input id="f_hitDiceTotal" type="number" min="0"></div>
+        <div class="field"><label>Hit Dice Left</label><input id="f_hitDiceLeft" type="number" min="0"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Hit Points</h2>
+      <div class="row" style="justify-content:center; gap:16px;">
+        <div class="field" style="max-width:90px;"><label>Max HP</label><input id="f_hpMax" type="number"></div>
+        <div class="field" style="max-width:90px;"><label>Current</label><input id="f_hpCurrent" type="number" class="hp-big"></div>
+        <div class="field" style="max-width:90px;"><label>Temp HP</label><input id="f_hpTemp" type="number"></div>
+      </div>
+      <div class="hp-controls" style="margin-top:8px;">
+        <button data-dmg="1">-1</button><button data-dmg="5">-5</button>
+        <input id="dmgAmount" type="number" placeholder="amt" style="width:55px;">
+        <button id="applyDamage" class="remove-btn">Damage</button>
+        <button id="applyHeal" class="primary">Heal</button>
+        <button data-heal="5">+5</button><button data-heal="1">+1</button>
+      </div>
+
+      <h3>Death Saves</h3>
+      <div class="death-row">
+        <div class="grp">
+          <div class="small">Successes</div>
+          <div class="pip-row" id="deathSuccess"></div>
+        </div>
+        <div class="grp">
+          <div class="small">Failures</div>
+          <div class="pip-row" id="deathFail"></div>
+        </div>
+      </div>
+
+      <h3>Concentration</h3>
+      <div class="row">
+        <label class="small"><input type="checkbox" id="f_concOn" class="checkbox-title"> Concentrating on:</label>
+        <input id="f_concSpell" type="text" class="grow" placeholder="spell name">
+      </div>
+
+      <h3>Conditions &amp; Exhaustion</h3>
+      <div class="conditions" id="conditionsList"></div>
+      <div class="row" style="margin-top:6px;">
+        <label class="small">Exhaustion level:</label>
+        <input id="f_exhaustion" type="number" min="0" max="6" style="width:50px;">
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Attacks &amp; Spellcasting</h2>
+      <div id="attacksList"></div>
+      <button id="addAttackBtn">+ Add Attack/Spell</button>
+    </div>
+
+    <div class="panel">
+      <h2>Dice Roller</h2>
+      <div class="flexwrap">
+        <button data-die="4">d4</button>
+        <button data-die="6">d6</button>
+        <button data-die="8">d8</button>
+        <button data-die="10">d10</button>
+        <button data-die="12">d12</button>
+        <button data-die="20" class="primary">d20</button>
+        <button data-die="100">d100</button>
+      </div>
+      <div class="row" style="margin-top:6px;">
+        <div class="field" style="max-width:80px;"><label>Modifier</label><input id="rollMod" type="number" value="0"></div>
+        <div class="field" style="max-width:80px;"><label># of dice</label><input id="rollCount" type="number" value="1" min="1"></div>
+        <div class="field">
+          <label>d20 mode</label>
+          <div class="adv-toggle">
+            <button id="advNormal" class="active">Normal</button>
+            <button id="advAdv">Advantage</button>
+            <button id="advDis">Disadvantage</button>
+          </div>
+        </div>
+      </div>
+      <div class="dice-log" id="diceLog"></div>
+      <button id="clearLogBtn" class="tiny-btn" style="margin-top:4px;">Clear Log</button>
+    </div>
+
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div class="col">
+
+    <div class="panel">
+      <h2>Spellcasting</h2>
+      <div class="row">
+        <div class="field"><label>Spellcasting Ability</label>
+          <select id="f_spellAbility">
+            <option value="">None</option>
+            <option value="str">STR</option><option value="dex">DEX</option><option value="con">CON</option>
+            <option value="int">INT</option><option value="wis">WIS</option><option value="cha">CHA</option>
+          </select>
+        </div>
+        <div class="field"><label>Save DC</label><input id="spellDC" readonly></div>
+        <div class="field"><label>Attack Bonus</label><input id="spellAtk" readonly></div>
+      </div>
+      <h3>Spell Slots</h3>
+      <div id="slotsList"></div>
+      <h3>Cantrips &amp; Known Spells</h3>
+      <textarea id="f_spellsKnown" placeholder="List cantrips and prepared/known spells here..."></textarea>
+    </div>
+
+    <div class="panel">
+      <h2>Equipment</h2>
+      <h3>Currency</h3>
+      <div class="currency-grid">
+        <div class="field"><label>CP</label><input id="c_cp" type="number" min="0"></div>
+        <div class="field"><label>SP</label><input id="c_sp" type="number" min="0"></div>
+        <div class="field"><label>EP</label><input id="c_ep" type="number" min="0"></div>
+        <div class="field"><label>GP</label><input id="c_gp" type="number" min="0"></div>
+        <div class="field"><label>PP</label><input id="c_pp" type="number" min="0"></div>
+      </div>
+      <h3>Inventory</h3>
+      <div id="inventoryList"></div>
+      <button id="addItemBtn">+ Add Item</button>
+    </div>
+
+    <div class="panel">
+      <h2>Features &amp; Traits</h2>
+      <textarea id="f_features" placeholder="Class features, racial traits, feats..." style="min-height:100px;"></textarea>
+    </div>
+
+    <div class="panel">
+      <h2>Proficiencies &amp; Languages</h2>
+      <textarea id="f_profs" placeholder="Armor, weapons, tools, languages..."></textarea>
+    </div>
+
+    <div class="panel">
+      <h2>Personality &amp; Notes</h2>
+      <textarea id="f_notes" placeholder="Traits, ideals, bonds, flaws, backstory, session notes..." style="min-height:120px;"></textarea>
+    </div>
+
+  </div>
+
+</div>
+
+<footer>Autosaves to this browser. Use Export regularly to back up your character as a file.</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  var STORAGE_KEY = "dnd_char_manager_v1";
+  var ABILITIES = [
+    {key:"str", label:"Strength"},
+    {key:"dex", label:"Dexterity"},
+    {key:"con", label:"Constitution"},
+    {key:"int", label:"Intelligence"},
+    {key:"wis", label:"Wisdom"},
+    {key:"cha", label:"Charisma"}
+  ];
+  var SAVE_LABELS = {str:"Strength",dex:"Dexterity",con:"Constitution",int:"Intelligence",wis:"Wisdom",cha:"Charisma"};
+  var SKILLS = [
+    {key:"acrobatics", label:"Acrobatics", ab:"dex"},
+    {key:"animalHandling", label:"Animal Handling", ab:"wis"},
+    {key:"arcana", label:"Arcana", ab:"int"},
+    {key:"athletics", label:"Athletics", ab:"str"},
+    {key:"deception", label:"Deception", ab:"cha"},
+    {key:"history", label:"History", ab:"int"},
+    {key:"insight", label:"Insight", ab:"wis"},
+    {key:"intimidation", label:"Intimidation", ab:"cha"},
+    {key:"investigation", label:"Investigation", ab:"int"},
+    {key:"medicine", label:"Medicine", ab:"wis"},
+    {key:"nature", label:"Nature", ab:"int"},
+    {key:"perception", label:"Perception", ab:"wis"},
+    {key:"performance", label:"Performance", ab:"cha"},
+    {key:"persuasion", label:"Persuasion", ab:"cha"},
+    {key:"religion", label:"Religion", ab:"int"},
+    {key:"sleightOfHand", label:"Sleight of Hand", ab:"dex"},
+    {key:"stealth", label:"Stealth", ab:"dex"},
+    {key:"survival", label:"Survival", ab:"wis"}
+  ];
+  var CONDITIONS = ["Blinded","Charmed","Deafened","Frightened","Grappled","Incapacitated",
+    "Invisible","Paralyzed","Petrified","Poisoned","Prone","Restrained","Stunned","Unconscious"];
+
+  function defaultCharacter(name){
+    var abilities = {}, saves = {}, skills = {};
+    ABILITIES.forEach(function(a){ abilities[a.key] = 10; saves[a.key] = {prof:false}; });
+    SKILLS.forEach(function(s){ skills[s.key] = {prof:false, expertise:false}; });
+    var slots = {};
+    for(var i=1;i<=9;i++){ slots[i] = {total:0, used:0}; }
+    return {
+      id: "c" + Date.now() + Math.floor(Math.random()*1000),
+      name: name || "New Character",
+      cls: "", level: 1, race: "", background: "", alignment: "", player: "", xp: 0,
+      abilities: abilities,
+      saves: saves,
+      skills: skills,
+      ac: 10, initManual: "", speed: "30 ft",
+      hitDiceType: "d8", hitDiceTotal: 1, hitDiceLeft: 1,
+      hpMax: 10, hpCurrent: 10, hpTemp: 0,
+      deathSuccess: 0, deathFail: 0,
+      concOn: false, concSpell: "",
+      conditions: {}, exhaustion: 0,
+      attacks: [],
+      spellAbility: "", spellsKnown: "",
+      slots: slots,
+      currency: {cp:0, sp:0, ep:0, gp:0, pp:0},
+      inventory: [],
+      features: "", profs: "", notes: ""
+    };
+  }
+
+  var db = { characters: [], activeId: null };
+
+  function load(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){
+        var parsed = JSON.parse(raw);
+        if(parsed && parsed.characters && parsed.characters.length){
+          db = parsed;
+          return;
+        }
+      }
+    }catch(e){ console.warn("Could not load saved data", e); }
+    var c = defaultCharacter("New Character");
+    db = { characters:[c], activeId: c.id };
+  }
+
+  function save(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+    }catch(e){ console.warn("Could not save", e); }
+  }
+
+  function getActive(){
+    var c = db.characters.find(function(x){ return x.id === db.activeId; });
+    if(!c && db.characters.length){ c = db.characters[0]; db.activeId = c.id; }
+    return c;
+  }
+
+  function mod(score){ return Math.floor((score - 10) / 2); }
+  function fmtMod(n){ return (n >= 0 ? "+" : "") + n; }
+  function profBonusForLevel(level){ return Math.floor((level - 1) / 4) + 2; }
+
+  // ---------- rendering ----------
+  var el = {};
+  ["charSelect","f_name","f_class","f_level","f_race","f_background","f_alignment","f_player","f_xp","f_profBonus",
+   "abilityGrid","savesList","skillsList","passivePerception",
+   "f_ac","f_initManual","f_speed","f_hitDiceType","f_hitDiceTotal","f_hitDiceLeft",
+   "f_hpMax","f_hpCurrent","f_hpTemp","dmgAmount","deathSuccess","deathFail",
+   "f_concOn","f_concSpell","conditionsList","f_exhaustion","attacksList",
+   "f_spellAbility","spellDC","spellAtk","slotsList","f_spellsKnown",
+   "c_cp","c_sp","c_ep","c_gp","c_pp","inventoryList",
+   "f_features","f_profs","f_notes","diceLog","rollMod","rollCount"
+  ].forEach(function(id){ el[id] = document.getElementById(id); });
+
+  var advMode = "normal"; // normal | adv | dis
+
+  function renderCharSelect(){
+    el.charSelect.innerHTML = "";
+    db.characters.forEach(function(c){
+      var opt = document.createElement("option");
+      opt.value = c.id;
+      opt.textContent = c.name || "(unnamed)";
+      if(c.id === db.activeId) opt.selected = true;
+      el.charSelect.appendChild(opt);
+    });
+  }
+
+  function renderAbilities(c){
+    el.abilityGrid.innerHTML = "";
+    ABILITIES.forEach(function(a){
+      var box = document.createElement("div");
+      box.className = "ability-box";
+      var m = mod(c.abilities[a.key]);
+      box.innerHTML =
+        "<h3>" + a.label.toUpperCase() + "</h3>" +
+        "<div class='mod'>" + fmtMod(m) + "</div>" +
+        "<input type='number' data-ability='" + a.key + "' value='" + c.abilities[a.key] + "'>" +
+        "<button class='rollbtn' data-rollability='" + a.key + "'>Roll Check</button>";
+      el.abilityGrid.appendChild(box);
+    });
+  }
+
+  function renderSaves(c){
+    el.savesList.innerHTML = "";
+    var pb = profBonusForLevel(c.level);
+    ABILITIES.forEach(function(a){
+      var s = c.saves[a.key];
+      var total = mod(c.abilities[a.key]) + (s.prof ? pb : 0);
+      var row = document.createElement("div");
+      row.className = "skill-row";
+      row.innerHTML =
+        "<input type='checkbox' class='checkbox-title' data-save='" + a.key + "' " + (s.prof?"checked":"") + ">" +
+        "<span class='name'>" + SAVE_LABELS[a.key] + "</span>" +
+        "<span class='mod'>" + fmtMod(total) + "</span>" +
+        "<button data-rollsave='" + a.key + "'>Roll</button>";
+      el.savesList.appendChild(row);
+    });
+  }
+
+  function renderSkills(c){
+    el.skillsList.innerHTML = "";
+    var pb = profBonusForLevel(c.level);
+    SKILLS.forEach(function(s){
+      var sk = c.skills[s.key];
+      var bonus = (sk.expertise ? pb*2 : (sk.prof ? pb : 0));
+      var total = mod(c.abilities[s.ab]) + bonus;
+      var row = document.createElement("div");
+      row.className = "skill-row";
+      row.innerHTML =
+        "<input type='checkbox' class='checkbox-title' data-skillprof='" + s.key + "' " + (sk.prof?"checked":"") + " title='Proficient'>" +
+        "<input type='checkbox' class='checkbox-title' data-skillexp='" + s.key + "' " + (sk.expertise?"checked":"") + " title='Expertise'>" +
+        "<span class='ab'>" + s.ab.toUpperCase() + "</span>" +
+        "<span class='name'>" + s.label + "</span>" +
+        "<span class='mod'>" + fmtMod(total) + "</span>" +
+        "<button data-rollskill='" + s.key + "'>Roll</button>";
+      el.skillsList.appendChild(row);
+    });
+    var passive = 10 + mod(c.abilities.wis) + (c.skills.perception.expertise ? pb*2 : (c.skills.perception.prof ? pb : 0));
+    el.passivePerception.textContent = passive;
+  }
+
+  function renderDeathSaves(c){
+    el.deathSuccess.innerHTML = "";
+    el.deathFail.innerHTML = "";
+    for(var i=1;i<=3;i++){
+      var p1 = document.createElement("span");
+      p1.className = "pip" + (c.deathSuccess >= i ? " filled" : "");
+      p1.dataset.deathSuccess = i;
+      el.deathSuccess.appendChild(p1);
+      var p2 = document.createElement("span");
+      p2.className = "pip" + (c.deathFail >= i ? " filled" : "");
+      p2.dataset.deathFail = i;
+      el.deathFail.appendChild(p2);
+    }
+  }
+
+  function renderConditions(c){
+    el.conditionsList.innerHTML = "";
+    CONDITIONS.forEach(function(cond){
+      var tag = document.createElement("span");
+      tag.className = "cond-tag" + (c.conditions[cond] ? " active" : "");
+      tag.textContent = cond;
+      tag.dataset.cond = cond;
+      el.conditionsList.appendChild(tag);
+    });
+  }
+
+  function renderAttacks(c){
+    el.attacksList.innerHTML = "";
+    if(!c.attacks.length){
+      el.attacksList.innerHTML = "<div class='small'>No attacks or spells added yet.</div>";
+    }
+    c.attacks.forEach(function(a, idx){
+      var row = document.createElement("div");
+      row.className = "list-row";
+      row.innerHTML =
+        "<input type='text' placeholder='Name' data-atk-name='" + idx + "' value='" + escapeAttr(a.name) + "'>" +
+        "<input type='text' placeholder='Bonus' class='narrow' data-atk-bonus='" + idx + "' value='" + escapeAttr(a.bonus) + "'>" +
+        "<input type='text' placeholder='Damage/Type' data-atk-damage='" + idx + "' value='" + escapeAttr(a.damage) + "'>" +
+        "<input type='text' placeholder='Notes' data-atk-notes='" + idx + "' value='" + escapeAttr(a.notes) + "'>" +
+        "<button class='tiny-btn' data-atk-roll='" + idx + "'>Roll</button>" +
+        "<button class='tiny-btn remove-btn' data-atk-remove='" + idx + "'>&times;</button>";
+      el.attacksList.appendChild(row);
+    });
+  }
+
+  function renderInventory(c){
+    el.inventoryList.innerHTML = "";
+    if(!c.inventory.length){
+      el.inventoryList.innerHTML = "<div class='small'>No items yet.</div>";
+    }
+    c.inventory.forEach(function(item, idx){
+      var row = document.createElement("div");
+      row.className = "list-row";
+      row.innerHTML =
+        "<input type='text' placeholder='Item' data-inv-name='" + idx + "' value='" + escapeAttr(item.name) + "'>" +
+        "<input type='text' placeholder='Qty' class='narrow' data-inv-qty='" + idx + "' value='" + escapeAttr(item.qty) + "'>" +
+        "<input type='text' placeholder='Notes' data-inv-notes='" + idx + "' value='" + escapeAttr(item.notes) + "'>" +
+        "<button class='tiny-btn remove-btn' data-inv-remove='" + idx + "'>&times;</button>";
+      el.inventoryList.appendChild(row);
+    });
+  }
+
+  function renderSlots(c){
+    el.slotsList.innerHTML = "";
+    for(var lvl=1; lvl<=9; lvl++){
+      var s = c.slots[lvl];
+      if(s.total <= 0 && lvl > 5) { /* still show but compact */ }
+      var row = document.createElement("div");
+      row.className = "row";
+      row.style.marginBottom = "4px";
+      var pips = "";
+      for(var i=1;i<=Math.max(s.total,0);i++){
+        pips += "<span class='pip" + (i<=s.used?" filled":"") + "' data-slotpip='" + lvl + "' data-pipidx='" + i + "'></span>";
+      }
+      row.innerHTML =
+        "<span class='small' style='width:50px;'>Lvl " + lvl + "</span>" +
+        "<input type='number' min='0' max='20' style='width:50px;' data-slottotal='" + lvl + "' value='" + s.total + "' title='total slots'>" +
+        "<span class='pip-row'>" + pips + "</span>";
+      el.slotsList.appendChild(row);
+    }
+  }
+
+  function escapeAttr(v){
+    if(v === undefined || v === null) return "";
+    return String(v).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
+  }
+
+  function renderAll(){
+    var c = getActive();
+    if(!c) return;
+    renderCharSelect();
+
+    el.f_name.value = c.name;
+    el.f_class.value = c.cls;
+    el.f_level.value = c.level;
+    el.f_race.value = c.race;
+    el.f_background.value = c.background;
+    el.f_alignment.value = c.alignment;
+    el.f_player.value = c.player;
+    el.f_xp.value = c.xp;
+    el.f_profBonus.value = fmtMod(profBonusForLevel(c.level));
+
+    renderAbilities(c);
+    renderSaves(c);
+    renderSkills(c);
+
+    el.f_ac.value = c.ac;
+    el.f_initManual.value = c.initManual;
+    el.f_speed.value = c.speed;
+    el.f_hitDiceType.value = c.hitDiceType;
+    el.f_hitDiceTotal.value = c.hitDiceTotal;
+    el.f_hitDiceLeft.value = c.hitDiceLeft;
+
+    el.f_hpMax.value = c.hpMax;
+    el.f_hpCurrent.value = c.hpCurrent;
+    el.f_hpTemp.value = c.hpTemp;
+
+    renderDeathSaves(c);
+    el.f_concOn.checked = c.concOn;
+    el.f_concSpell.value = c.concSpell;
+    renderConditions(c);
+    el.f_exhaustion.value = c.exhaustion;
+
+    renderAttacks(c);
+
+    el.f_spellAbility.value = c.spellAbility;
+    var pb = profBonusForLevel(c.level);
+    if(c.spellAbility){
+      el.spellDC.value = 8 + pb + mod(c.abilities[c.spellAbility]);
+      el.spellAtk.value = fmtMod(pb + mod(c.abilities[c.spellAbility]));
+    } else {
+      el.spellDC.value = "";
+      el.spellAtk.value = "";
+    }
+    renderSlots(c);
+    el.f_spellsKnown.value = c.spellsKnown;
+
+    el.c_cp.value = c.currency.cp;
+    el.c_sp.value = c.currency.sp;
+    el.c_ep.value = c.currency.ep;
+    el.c_gp.value = c.currency.gp;
+    el.c_pp.value = c.currency.pp;
+    renderInventory(c);
+
+    el.f_features.value = c.features;
+    el.f_profs.value = c.profs;
+    el.f_notes.value = c.notes;
+  }
+
+  function persistAndMaybeRender(rerender){
+    save();
+    if(rerender) renderAll();
+  }
+
+  // ---------- dice ----------
+  function rollDie(sides){ return 1 + Math.floor(Math.random()*sides); }
+
+  function logRoll(html){
+    var line = document.createElement("div");
+    line.innerHTML = html;
+    el.diceLog.insertBefore(line, el.diceLog.firstChild);
+  }
+
+  function doRoll(sides, modifier, label, count){
+    count = count || 1;
+    var results = [];
+    var usedAdv = (sides === 20 && advMode !== "normal");
+    var displayRolls = [];
+    var total = 0;
+    for(var i=0;i<count;i++){
+      if(usedAdv){
+        var r1 = rollDie(20), r2 = rollDie(20);
+        var chosen = advMode === "adv" ? Math.max(r1,r2) : Math.min(r1,r2);
+        displayRolls.push(r1 + "/" + r2 + "&rarr;" + chosen);
+        total += chosen;
+        results.push(chosen);
+      } else {
+        var r = rollDie(sides);
+        displayRolls.push(String(r));
+        total += r;
+        results.push(r);
+      }
+    }
+    var grand = total + Number(modifier || 0);
+    var critClass = "";
+    if(sides === 20 && count === 1){
+      if(results[0] === 20) critClass = "critgood";
+      if(results[0] === 1) critClass = "critbad";
+    }
+    var modStr = modifier ? (Number(modifier) >= 0 ? " +" + modifier : " " + modifier) : "";
+    logRoll(
+      "<span class='" + critClass + "'>" + (label ? ("<b>" + label + "</b>: ") : "") +
+      "d" + sides + " [" + displayRolls.join(", ") + "]" + modStr + " = <b>" + grand + "</b></span>"
+    );
+    return grand;
+  }
+
+  function setAdvMode(m){
+    advMode = m;
+    [el ,null];
+    document.getElementById("advNormal").classList.toggle("active", m==="normal");
+    document.getElementById("advAdv").classList.toggle("active", m==="adv");
+    document.getElementById("advDis").classList.toggle("active", m==="dis");
+  }
+
+  // ---------- event wiring ----------
+  function bindStaticEvents(){
+    el.charSelect.addEventListener("change", function(){
+      db.activeId = el.charSelect.value;
+      save();
+      renderAll();
+    });
+
+    document.getElementById("newCharBtn").addEventListener("click", function(){
+      var name = prompt("New character name:", "New Character");
+      if(name === null) return;
+      var c = defaultCharacter(name || "New Character");
+      db.characters.push(c);
+      db.activeId = c.id;
+      save();
+      renderAll();
+    });
+
+    document.getElementById("dupCharBtn").addEventListener("click", function(){
+      var c = getActive();
+      if(!c) return;
+      var copy = JSON.parse(JSON.stringify(c));
+      copy.id = "c" + Date.now() + Math.floor(Math.random()*1000);
+      copy.name = c.name + " (copy)";
+      db.characters.push(copy);
+      db.activeId = copy.id;
+      save();
+      renderAll();
+    });
+
+    document.getElementById("deleteCharBtn").addEventListener("click", function(){
+      if(db.characters.length <= 1){
+        alert("You must have at least one character.");
+        return;
+      }
+      var c = getActive();
+      if(!confirm("Delete '" + c.name + "'? This cannot be undone.")) return;
+      db.characters = db.characters.filter(function(x){ return x.id !== c.id; });
+      db.activeId = db.characters[0].id;
+      save();
+      renderAll();
+    });
+
+    document.getElementById("exportBtn").addEventListener("click", function(){
+      var c = getActive();
+      var blob = new Blob([JSON.stringify(c, null, 2)], {type:"application/json"});
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = (c.name || "character").replace(/[^a-z0-9\-_ ]/gi,"_") + ".json";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    document.getElementById("importBtn").addEventListener("click", function(){
+      el.importFileFake && null;
+      document.getElementById("importFile").click();
+    });
+
+    document.getElementById("importFile").addEventListener("change", function(ev){
+      var file = ev.target.files[0];
+      if(!file) return;
+      var reader = new FileReader();
+      reader.onload = function(e){
+        try{
+          var data = JSON.parse(e.target.result);
+          if(!data.id) data.id = "c" + Date.now() + Math.floor(Math.random()*1000);
+          // ensure defaults for any missing fields
+          var base = defaultCharacter(data.name);
+          var merged = Object.assign({}, base, data);
+          db.characters.push(merged);
+          db.activeId = merged.id;
+          save();
+          renderAll();
+          alert("Imported '" + merged.name + "'.");
+        }catch(err){
+          alert("Could not import file: " + err.message);
+        }
+        ev.target.value = "";
+      };
+      reader.readAsText(file);
+    });
+
+    document.getElementById("shortRestBtn").addEventListener("click", function(){
+      var c = getActive();
+      var hd = prompt("Hit dice to spend for short rest (0 if none):", "0");
+      if(hd === null) return;
+      hd = parseInt(hd, 10) || 0;
+      hd = Math.min(hd, c.hitDiceLeft);
+      var healed = prompt("HP recovered from spent hit dice (enter total, 0 if none):", "0");
+      if(healed === null) return;
+      healed = parseInt(healed, 10) || 0;
+      c.hitDiceLeft = Math.max(0, c.hitDiceLeft - hd);
+      c.hpCurrent = Math.min(c.hpMax, c.hpCurrent + healed);
+      save();
+      renderAll();
+    });
+
+    document.getElementById("longRestBtn").addEventListener("click", function(){
+      var c = getActive();
+      if(!confirm("Long rest: restore HP to max, restore all spell slots, regain half hit dice, clear death saves and unconscious. Continue?")) return;
+      c.hpCurrent = c.hpMax;
+      c.hpTemp = 0;
+      c.deathSuccess = 0;
+      c.deathFail = 0;
+      c.conditions["Unconscious"] = false;
+      var regain = Math.max(1, Math.floor(c.hitDiceTotal / 2));
+      c.hitDiceLeft = Math.min(c.hitDiceTotal, c.hitDiceLeft + regain);
+      Object.keys(c.slots).forEach(function(lvl){ c.slots[lvl].used = 0; });
+      if(c.exhaustion > 0) c.exhaustion -= 1;
+      save();
+      renderAll();
+    });
+
+    // basic text/number fields -> generic binder
+    function bindField(elm, getSet){
+      elm.addEventListener("input", function(){
+        var c = getActive();
+        getSet(c, elm.value);
+        save();
+      });
+      elm.addEventListener("change", function(){
+        renderAll();
+      });
+    }
+
+    bindField(el.f_name, function(c,v){ c.name = v; });
+    bindField(el.f_class, function(c,v){ c.cls = v; });
+    bindField(el.f_level, function(c,v){ c.level = Math.max(1, Math.min(20, parseInt(v,10)||1)); });
+    bindField(el.f_race, function(c,v){ c.race = v; });
+    bindField(el.f_background, function(c,v){ c.background = v; });
+    bindField(el.f_alignment, function(c,v){ c.alignment = v; });
+    bindField(el.f_player, function(c,v){ c.player = v; });
+    bindField(el.f_xp, function(c,v){ c.xp = parseInt(v,10)||0; });
+
+    bindField(el.f_ac, function(c,v){ c.ac = parseInt(v,10)||0; });
+    bindField(el.f_initManual, function(c,v){ c.initManual = v; });
+    bindField(el.f_speed, function(c,v){ c.speed = v; });
+    bindField(el.f_hitDiceType, function(c,v){ c.hitDiceType = v; });
+    bindField(el.f_hitDiceTotal, function(c,v){ c.hitDiceTotal = parseInt(v,10)||0; });
+    bindField(el.f_hitDiceLeft, function(c,v){ c.hitDiceLeft = parseInt(v,10)||0; });
+
+    bindField(el.f_hpMax, function(c,v){ c.hpMax = parseInt(v,10)||0; });
+    bindField(el.f_hpCurrent, function(c,v){ c.hpCurrent = parseInt(v,10)||0; });
+    bindField(el.f_hpTemp, function(c,v){ c.hpTemp = parseInt(v,10)||0; });
+
+    el.f_concOn.addEventListener("change", function(){
+      var c = getActive(); c.concOn = el.f_concOn.checked; save();
+    });
+    bindField(el.f_concSpell, function(c,v){ c.concSpell = v; });
+    bindField(el.f_exhaustion, function(c,v){ c.exhaustion = Math.max(0, Math.min(6, parseInt(v,10)||0)); });
+
+    bindField(el.f_spellsKnown, function(c,v){ c.spellsKnown = v; });
+    el.f_spellAbility.addEventListener("change", function(){
+      var c = getActive(); c.spellAbility = el.f_spellAbility.value; save(); renderAll();
+    });
+
+    ["c_cp","c_sp","c_ep","c_gp","c_pp"].forEach(function(id){
+      bindField(el[id], function(c,v){ c.currency[id.slice(2)] = parseInt(v,10)||0; });
+    });
+
+    bindField(el.f_features, function(c,v){ c.features = v; });
+    bindField(el.f_profs, function(c,v){ c.profs = v; });
+    bindField(el.f_notes, function(c,v){ c.notes = v; });
+
+    document.getElementById("applyDamage").addEventListener("click", function(){
+      var c = getActive();
+      var amt = parseInt(el.dmgAmount.value, 10) || 0;
+      applyDamage(c, amt);
+      save(); renderAll();
+    });
+    document.getElementById("applyHeal").addEventListener("click", function(){
+      var c = getActive();
+      var amt = parseInt(el.dmgAmount.value, 10) || 0;
+      c.hpCurrent = Math.min(c.hpMax, c.hpCurrent + amt);
+      save(); renderAll();
+    });
+    document.querySelectorAll("[data-dmg]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var c = getActive();
+        applyDamage(c, parseInt(btn.dataset.dmg,10));
+        save(); renderAll();
+      });
+    });
+    document.querySelectorAll("[data-heal]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var c = getActive();
+        c.hpCurrent = Math.min(c.hpMax, c.hpCurrent + parseInt(btn.dataset.heal,10));
+        save(); renderAll();
+      });
+    });
+
+    document.getElementById("addAttackBtn").addEventListener("click", function(){
+      var c = getActive();
+      c.attacks.push({name:"", bonus:"", damage:"", notes:""});
+      save(); renderAll();
+    });
+
+    document.getElementById("addItemBtn").addEventListener("click", function(){
+      var c = getActive();
+      c.inventory.push({name:"", qty:"1", notes:""});
+      save(); renderAll();
+    });
+
+    // dice roller
+    document.querySelectorAll("[data-die]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var sides = parseInt(btn.dataset.die,10);
+        var modifier = parseInt(el.rollMod.value,10) || 0;
+        var count = parseInt(el.rollCount.value,10) || 1;
+        doRoll(sides, modifier, "d" + sides + " roll", count);
+      });
+    });
+    document.getElementById("advNormal").addEventListener("click", function(){ setAdvMode("normal"); });
+    document.getElementById("advAdv").addEventListener("click", function(){ setAdvMode("adv"); });
+    document.getElementById("advDis").addEventListener("click", function(){ setAdvMode("dis"); });
+    document.getElementById("clearLogBtn").addEventListener("click", function(){ el.diceLog.innerHTML = ""; });
+  }
+
+  function applyDamage(c, amt){
+    if(amt <= 0) return;
+    if(c.hpTemp > 0){
+      var used = Math.min(c.hpTemp, amt);
+      c.hpTemp -= used;
+      amt -= used;
+    }
+    c.hpCurrent = Math.max(0, c.hpCurrent - amt);
+  }
+
+  // dynamic (re-rendered) sections need event delegation on parents
+  function bindDelegatedEvents(){
+    el.abilityGrid.addEventListener("input", function(ev){
+      var t = ev.target;
+      if(t.dataset.ability){
+        var c = getActive();
+        c.abilities[t.dataset.ability] = parseInt(t.value,10) || 0;
+        save();
+        renderAll();
+      }
+    });
+    el.abilityGrid.addEventListener("click", function(ev){
+      var t = ev.target;
+      if(t.dataset.rollability){
+        var c = getActive();
+        var m = mod(c.abilities[t.dataset.rollability]);
+        doRoll(20, m, t.dataset.rollability.toUpperCase() + " check");
+      }
+    });
+
+    el.savesList.addEventListener("change", function(ev){
+      var t = ev.target;
+      if(t.dataset.save){
+        var c = getActive();
+        c.saves[t.dataset.save].prof = t.checked;
+        save(); renderAll();
+      }
+    });
+    el.savesList.addEventListener("click", function(ev){
+      var t = ev.target;
+      if(t.dataset.rollsave){
+        var c = getActive();
+        var pb = profBonusForLevel(c.level);
+        var s = c.saves[t.dataset.rollsave];
+        var m = mod(c.abilities[t.dataset.rollsave]) + (s.prof?pb:0);
+        doRoll(20, m, SAVE_LABELS[t.dataset.rollsave] + " save");
+      }
+    });
+
+    el.skillsList.addEventListener("change", function(ev){
+      var t = ev.target;
+      var c = getActive();
+      if(t.dataset.skillprof){
+        c.skills[t.dataset.skillprof].prof = t.checked;
+        save(); renderAll();
+      } else if(t.dataset.skillexp){
+        c.skills[t.dataset.skillexp].expertise = t.checked;
+        save(); renderAll();
+      }
+    });
+    el.skillsList.addEventListener("click", function(ev){
+      var t = ev.target;
+      if(t.dataset.rollskill){
+        var c = getActive();
+        var pb = profBonusForLevel(c.level);
+        var sdef = SKILLS.find(function(s){ return s.key === t.dataset.rollskill; });
+        var sk = c.skills[t.dataset.rollskill];
+        var bonus = sk.expertise ? pb*2 : (sk.prof ? pb : 0);
+        var m = mod(c.abilities[sdef.ab]) + bonus;
+        doRoll(20, m, sdef.label);
+      }
+    });
+
+    el.deathSuccess.addEventListener("click", function(ev){
+      var t = ev.target;
+      if(t.dataset.deathSuccess){
+        var c = getActive();
+        var n = parseInt(t.dataset.deathSuccess,10);
+        c.deathSuccess = (c.deathSuccess === n) ? n-1 : n;
+        save(); renderAll();
+      }
+    });
+    el.deathFail.addEventListener("click", function(ev){
+      var t = ev.target;
+      if(t.dataset.deathFail){
+        var c = getActive();
+        var n = parseInt(t.dataset.deathFail,10);
+        c.deathFail = (c.deathFail === n) ? n-1 : n;
+        save(); renderAll();
+      }
+    });
+
+    el.conditionsList.addEventListener("click", function(ev){
+      var t = ev.target;
+      if(t.dataset.cond){
+        var c = getActive();
+        c.conditions[t.dataset.cond] = !c.conditions[t.dataset.cond];
+        save(); renderAll();
+      }
+    });
+
+    el.attacksList.addEventListener("input", function(ev){
+      var t = ev.target, c = getActive();
+      if(t.dataset.atkName !== undefined) c.attacks[t.dataset.atkName].name = t.value;
+      else if(t.dataset.atkBonus !== undefined) c.attacks[t.dataset.atkBonus].bonus = t.value;
+      else if(t.dataset.atkDamage !== undefined) c.attacks[t.dataset.atkDamage].damage = t.value;
+      else if(t.dataset.atkNotes !== undefined) c.attacks[t.dataset.atkNotes].notes = t.value;
+      else return;
+      save();
+    });
+    el.attacksList.addEventListener("click", function(ev){
+      var t = ev.target, c = getActive();
+      if(t.dataset.atkRemove !== undefined){
+        c.attacks.splice(parseInt(t.dataset.atkRemove,10),1);
+        save(); renderAll();
+      } else if(t.dataset.atkRoll !== undefined){
+        var a = c.attacks[parseInt(t.dataset.atkRoll,10)];
+        var bonusNum = parseInt((a.bonus||"0").replace(/[^\-0-9]/g,""),10) || 0;
+        doRoll(20, bonusNum, (a.name || "Attack") + " (to-hit)");
+      }
+    });
+
+    el.inventoryList.addEventListener("input", function(ev){
+      var t = ev.target, c = getActive();
+      if(t.dataset.invName !== undefined) c.inventory[t.dataset.invName].name = t.value;
+      else if(t.dataset.invQty !== undefined) c.inventory[t.dataset.invQty].qty = t.value;
+      else if(t.dataset.invNotes !== undefined) c.inventory[t.dataset.invNotes].notes = t.value;
+      else return;
+      save();
+    });
+    el.inventoryList.addEventListener("click", function(ev){
+      var t = ev.target, c = getActive();
+      if(t.dataset.invRemove !== undefined){
+        c.inventory.splice(parseInt(t.dataset.invRemove,10),1);
+        save(); renderAll();
+      }
+    });
+
+    el.slotsList.addEventListener("input", function(ev){
+      var t = ev.target, c = getActive();
+      if(t.dataset.slottotal){
+        var lvl = t.dataset.slottotal;
+        c.slots[lvl].total = Math.max(0, parseInt(t.value,10)||0);
+        if(c.slots[lvl].used > c.slots[lvl].total) c.slots[lvl].used = c.slots[lvl].total;
+        save(); renderAll();
+      }
+    });
+    el.slotsList.addEventListener("click", function(ev){
+      var t = ev.target, c = getActive();
+      if(t.dataset.slotpip){
+        var lvl = t.dataset.slotpip;
+        var idx = parseInt(t.dataset.pipidx,10);
+        var s = c.slots[lvl];
+        s.used = (s.used === idx) ? idx-1 : idx;
+        save(); renderAll();
+      }
+    });
+  }
+
+  load();
+  bindStaticEvents();
+  bindDelegatedEvents();
+  renderAll();
+})();
+</script>
+</body>
+</html>
