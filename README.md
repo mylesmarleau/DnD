@@ -8,6 +8,10 @@ Open `index.html` in any browser (double-click the file, or host it — e.g. wit
 
 **Recommended:** since local storage lives in one browser, use **Export** regularly to download your character as a `.json` backup file, and **Import** to load it on another device or after clearing browser data.
 
+### New to D&D?
+
+Turn on **Beginner Mode** in the top bar to show short explanations under each section of the sheet (what a saving throw is, how to attack, what AC means, what to do on your turn, etc.). Click **New Player Guide** any time for a fuller one-page walkthrough of the basics — the three kinds of rolls, how a combat turn works, and what to do when you take damage. Neither of these need to be memorized; they're there to glance at mid-session.
+
 ## Features
 
 - Character info: name, class, level, race, background, alignment, XP, proficiency bonus (auto-calculated), inspiration tracker

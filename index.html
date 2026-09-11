@@ -174,6 +174,18 @@
   .resource-row input.rname{flex:1;}
   .resource-row input.rnum{width:48px; text-align:center;}
   .resource-row select{width:90px;}
+  .beginner-hint{
+    display:none; font-size:0.76rem; color:var(--text); background:var(--panel2);
+    border-left:3px solid var(--gold); padding:6px 8px; margin-top:8px; border-radius:4px;
+    line-height:1.4;
+  }
+  body.beginner-mode .beginner-hint{display:block;}
+  .guide-box{max-width:640px;}
+  .guide-box h3{color:var(--gold); margin-top:16px;}
+  .guide-box p, .guide-box li{font-size:0.88rem; line-height:1.5;}
+  .guide-box ul, .guide-box ol{padding-left:20px;}
+  .close-x{float:right; cursor:pointer; font-size:1.2rem; color:var(--muted); line-height:1;}
+  .close-x:hover{color:var(--gold);}
 </style>
 </head>
 <body>
@@ -190,6 +202,14 @@
   <button id="exportBtn">Export</button>
   <button id="importBtn">Import</button>
   <input type="file" id="importFile" accept="application/json">
+  <label class="small" style="display:flex; align-items:center; gap:4px;">
+    <input type="checkbox" id="beginnerModeToggle" class="checkbox-title"> Beginner Mode
+  </label>
+  <button id="newPlayerGuideBtn">? New Player Guide</button>
+</div>
+
+<div class="beginner-hint" style="margin:10px 14px 0 14px;">
+  <b>Short Rest</b> (~1 hour, as many as you like per day) lets you spend Hit Dice to heal. <b>Long Rest</b> (~8 hours, usually once per day) fully heals you and resets your spell slots and most limited-use abilities. Your DM will tell you when you get the chance to rest. New here? Click <b>New Player Guide</b> above for a fuller walkthrough.
 </div>
 
 <div class="container">
@@ -218,6 +238,7 @@
         <div class="field"><label>XP</label><input id="f_xp" type="number" min="0"></div>
         <div class="field"><label>Prof. Bonus</label><input id="f_profBonus" type="text" readonly></div>
       </div>
+      <div class="beginner-hint">Your <b>Proficiency Bonus</b> gets added to rolls for things you're trained in (attacks with weapons you're proficient with, skills you're proficient in, saving throws you're proficient in). It goes up as you level up — this app calculates it for you.</div>
       <div class="row" style="margin-top:10px; align-items:center;">
         <label class="small"><input type="checkbox" id="f_inspiration" class="checkbox-title"> Inspiration</label>
         <div class="spacer"></div>
@@ -232,16 +253,19 @@
     <div class="panel">
       <h2>Ability Scores</h2>
       <div class="grid6" id="abilityGrid"></div>
+      <div class="beginner-hint">These 6 numbers describe your character. The big colored number is your <b>modifier</b> — that's what actually gets added to rolls. When the DM asks for "a Strength check" or similar, hit that ability's <b>Roll Check</b> button: it rolls a d20 and adds the modifier.</div>
     </div>
 
     <div class="panel">
       <h2>Saving Throws</h2>
       <div id="savesList"></div>
+      <div class="beginner-hint">A <b>saving throw</b> is a roll to resist or shrug off something happening <i>to</i> you — a trap, a spell, poison. The DM will say "make a [ability] save" and tell you the DC (the number you need to meet or beat). Click <b>Roll</b> next to that ability.</div>
     </div>
 
     <div class="panel">
       <h2>Skills <span class="small">(passive perception: <b id="passivePerception">10</b>)</span></h2>
       <div id="skillsList"></div>
+      <div class="beginner-hint">A <b>skill check</b> is when you try to do something uncertain — sneak (Stealth), persuade someone (Persuasion), notice something (Perception), recall lore (History), etc. The DM tells you what to roll or you suggest one that fits your action. Click <b>Roll</b> next to the matching skill — it rolls a d20 and adds your bonus. Higher = better. The two checkboxes are for <b>proficient</b> (you're trained in it) and <b>expertise</b> (double proficiency, rare) — check these based on your character sheet/class.</div>
     </div>
 
   </div>
@@ -256,6 +280,7 @@
         <div class="field"><label>Initiative</label><input id="f_initManual" type="number" placeholder="auto"></div>
         <div class="field"><label>Speed</label><input id="f_speed" type="text" placeholder="30 ft"></div>
       </div>
+      <div class="beginner-hint">Your <b>Armor Class (AC)</b> is how hard you are to hit — an enemy's attack roll (their d20 + their bonus) has to meet or beat it to hit you. You don't roll anything for this; it's just a number the DM compares against. <b>Initiative</b> decides turn order at the start of a fight — leave it blank to auto-use your DEX modifier and just click Roll Initiative in the Combat Tracker below when a fight starts.</div>
       <div class="row" style="margin-top:8px;">
         <div class="field"><label>Hit Dice Type</label>
           <select id="f_hitDiceType">
@@ -269,6 +294,11 @@
 
     <div class="panel">
       <h2>Combat Tracker</h2>
+      <div class="beginner-hint">
+        <b>When a fight starts:</b> everyone rolls initiative (click <b>Roll Initiative</b> below) — the DM calls out names highest to lowest, and you act on your turn in that order, every round, until the fight ends.<br><br>
+        <b>On your turn</b> you generally get: one <b>Movement</b> (up to your Speed), one <b>Action</b> (Attack, cast a spell, Dash, Dodge, Help, Hide, etc.), and one <b>Bonus Action</b> only if a feature/spell gives you one. You can do these in any order. Click the tags below to mark what you've used — they'll reset for you when you hit "Next Round". A <b>Reaction</b> can be used on someone else's turn (e.g. an opportunity attack) — you get one per round.<br><br>
+        Not sure what to do on your turn? A safe default: move into range, then <b>Attack</b> — pick a weapon/spell in "Attacks &amp; Spellcasting" below and click its Roll button.
+      </div>
       <div class="row" style="justify-content:center; gap:20px;">
         <div>
           <div class="small" style="text-align:center;">Round</div>
@@ -322,6 +352,7 @@
         <button id="applyHeal" class="primary">Heal</button>
         <button data-heal="5">+5</button><button data-heal="1">+1</button>
       </div>
+      <div class="beginner-hint">When you take damage, type the amount in "amt" and click <b>Damage</b> (Temp HP is used up first automatically). If you hit 0 HP, you fall unconscious and start making <b>Death Saves</b> below on your turns until you're healed or stabilized — tell your DM right away.</div>
 
       <h3>Death Saves</h3>
       <div class="death-row">
@@ -353,6 +384,7 @@
       <h2>Attacks &amp; Spellcasting</h2>
       <div id="attacksList"></div>
       <button id="addAttackBtn">+ Add Attack/Spell</button>
+      <div class="beginner-hint">Fill in your weapons/spells once (name, attack bonus, damage). To attack: click <b>Roll</b> on the row — that's your to-hit roll. Tell the DM the total; if it meets or beats the target's AC, you hit. Then roll the damage dice listed (use the Dice Roller below, e.g. click d8 for "1d8") and add any damage bonus shown.</div>
     </div>
 
     <div class="panel">
@@ -380,6 +412,7 @@
       </div>
       <div class="dice-log" id="diceLog"></div>
       <button id="clearLogBtn" class="tiny-btn" style="margin-top:4px;">Clear Log</button>
+      <div class="beginner-hint">Most rolls in D&D are a d20 plus a modifier compared against a target number (an enemy's AC, or a DC the DM sets). <b>Advantage</b> means roll two d20s and take the higher (good for you); <b>Disadvantage</b> means take the lower (bad for you) — the DM will tell you when either applies.</div>
     </div>
 
   </div>
@@ -401,6 +434,7 @@
         <div class="field"><label>Attack Bonus</label><input id="spellAtk" readonly></div>
         <div class="field"><label>Spells Prepared</label><input id="spellPrepared" readonly></div>
       </div>
+      <div class="beginner-hint">Casting a spell that targets someone uses either an <b>attack roll</b> (d20 + Attack Bonus vs their AC, like a weapon) or forces them to make a <b>saving throw</b> against your <b>Save DC</b> (they roll, trying to meet or beat that number). Each spell says which. Casting a spell of level 1+ uses up one <b>Spell Slot</b> of that level or higher — click a pip below to mark it used, and they all come back on a Long Rest. Cantrips (level 0) don't use slots.</div>
       <h3>Spell Slots</h3>
       <div id="slotsList"></div>
       <h3>Cantrips &amp; Known Spells</h3>
@@ -485,6 +519,50 @@
 </div>
 
 <footer>Autosaves to this browser. Use Export regularly to back up your character as a file.</footer>
+
+<div class="modal-overlay" id="guideModal">
+  <div class="modal-box guide-box">
+    <span class="close-x" id="closeGuideBtn">&times;</span>
+    <h2>New Player Guide</h2>
+    <p>You don't need to memorize any of this — just glance back here (or turn on <b>Beginner Mode</b> for hints right on the sheet) whenever you're not sure what to do.</p>
+
+    <h3>The basic loop</h3>
+    <p>The DM describes a situation. You say what your character does. If the outcome is uncertain, you roll dice — usually a <b>d20</b> plus a modifier — and compare it to a target number. Higher is better. That's really it; everything below is a variation on this.</p>
+
+    <h3>The three kinds of rolls</h3>
+    <ul>
+      <li><b>Ability check</b> — you're trying to do something (climb, sneak, persuade, recall a fact). Roll d20 + the matching skill's bonus (or plain ability modifier if no skill fits). The DM sets the target number (the DC) and tells you if you succeed.</li>
+      <li><b>Saving throw</b> — something is happening <i>to</i> you (a trap, a spell, poison) and you're trying to resist it. Roll d20 + that ability's save bonus, versus a DC the DM gives you.</li>
+      <li><b>Attack roll</b> — you're trying to hit something in combat. Roll d20 + your attack bonus; if it meets or beats the target's Armor Class (AC), you hit and roll damage.</li>
+    </ul>
+    <p>In every case: find the matching row on the sheet, click its <b>Roll</b> button, and tell the DM the total.</p>
+
+    <h3>Your turn in combat</h3>
+    <ol>
+      <li>When a fight starts, everyone rolls initiative — click <b>Roll Initiative</b> in the Combat Tracker. Turn order goes highest to lowest, every round.</li>
+      <li>On your turn you can: <b>Move</b> up to your Speed, take one <b>Action</b>, and take one <b>Bonus Action</b> if something grants you one — in any order.</li>
+      <li>Simplest action: <b>Attack</b>. Pick a weapon/spell in "Attacks & Spellcasting," click Roll for the to-hit roll, and if it beats the target's AC, roll the listed damage dice too.</li>
+      <li>Other common actions: <b>Cast a Spell</b>, <b>Dash</b> (double your movement), <b>Dodge</b> (attacks against you have disadvantage), <b>Help</b> (give an ally advantage), <b>Hide</b>.</li>
+      <li>Not your turn? You can still take a <b>Reaction</b> once per round if something triggers one (most common: an opportunity attack when an enemy walks away from you).</li>
+      <li>Mark what you've used with the Action/Bonus/Reaction tags in the Combat Tracker — they reset automatically when you click "Next Round."</li>
+    </ol>
+
+    <h3>Taking damage &amp; healing</h3>
+    <p>When you're hit, enter the damage amount and click <b>Damage</b> in the Hit Points panel. If you hit 0 HP you fall unconscious and roll <b>Death Saves</b> on your turns until stabilized or healed — flag this to your DM immediately, there are extra rules they'll walk you through. Between fights, a <b>Short Rest</b> lets you spend Hit Dice to heal some HP; a <b>Long Rest</b> heals you fully and resets spell slots and most limited-use features.</p>
+
+    <h3>Things nobody tells you up front</h3>
+    <ul>
+      <li>You can describe what you want to do in plain words ("I want to search the desk") — you don't need to know the exact rule name. The DM will tell you what to roll, if anything.</li>
+      <li>It's completely normal to ask "what does that mean?" or "what are my options here?" mid-session.</li>
+      <li>Rolling low isn't just bad — it's often the most interesting outcome at the table. A missed attack or a failed check is a normal part of the story, not something to apologize for.</li>
+      <li>You can always ask the DM "can I use my [feature/spell name] here?" if you're not sure something applies.</li>
+    </ul>
+
+    <div class="row" style="justify-content:flex-end; margin-top:14px;">
+      <button id="closeGuideBtn2" class="primary">Got it</button>
+    </div>
+  </div>
+</div>
 
 <div class="modal-overlay" id="levelUpModal">
   <div class="modal-box">
@@ -667,7 +745,8 @@
    "f_inspiration","levelLogWrap","levelLog",
    "roundDisplay","initBonusDisplay","actionEcon","f_movementUsed","speedRef","effectsList",
    "resourcesList",
-   "levelUpModal","levelUpTitle","levelUpSubtitle","hpGainPreview","rerollHpBtn","levelUpNotes"
+   "levelUpModal","levelUpTitle","levelUpSubtitle","hpGainPreview","rerollHpBtn","levelUpNotes",
+   "beginnerModeToggle","guideModal"
   ].forEach(function(id){ el[id] = document.getElementById(id); });
 
   var advMode = "normal"; // normal | adv | dis
@@ -1686,9 +1765,34 @@
     });
   }
 
+  var BEGINNER_KEY = "dnd_beginner_mode";
+  function loadBeginnerMode(){
+    var on = localStorage.getItem(BEGINNER_KEY) === "1";
+    document.body.classList.toggle("beginner-mode", on);
+    el.beginnerModeToggle.checked = on;
+  }
+  function bindGuideEvents(){
+    el.beginnerModeToggle.addEventListener("change", function(){
+      var on = el.beginnerModeToggle.checked;
+      document.body.classList.toggle("beginner-mode", on);
+      try{ localStorage.setItem(BEGINNER_KEY, on ? "1" : "0"); }catch(e){}
+    });
+    document.getElementById("newPlayerGuideBtn").addEventListener("click", function(){
+      el.guideModal.classList.add("open");
+    });
+    document.getElementById("closeGuideBtn").addEventListener("click", function(){
+      el.guideModal.classList.remove("open");
+    });
+    document.getElementById("closeGuideBtn2").addEventListener("click", function(){
+      el.guideModal.classList.remove("open");
+    });
+  }
+
   load();
+  loadBeginnerMode();
   bindStaticEvents();
   bindDelegatedEvents();
+  bindGuideEvents();
   renderAll();
 })();
 </script>
