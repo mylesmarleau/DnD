@@ -255,7 +255,7 @@
     <div class="panel">
       <h2>Ability Scores</h2>
       <div class="grid6" id="abilityGrid"></div>
-      <div class="beginner-hint">These 6 numbers describe your character. The big colored number is your <b>modifier</b> — that's what actually gets added to rolls. When the DM asks for "a Strength check" or similar, hit that ability's <b>Roll Check</b> button: it rolls a d20 and adds the modifier.</div>
+      <div class="beginner-hint">These 6 numbers describe your character. The big colored number is your <b>modifier</b> — that's what actually gets added to rolls. When the DM asks for "a Strength check" or similar, hit that ability's <b>Roll Check</b> button to see the modifier, then roll your own d20 and add it.</div>
     </div>
 
     <div class="panel">
@@ -267,7 +267,7 @@
     <div class="panel">
       <h2>Skills <span class="small">(passive perception: <b id="passivePerception">10</b>)</span></h2>
       <div id="skillsList"></div>
-      <div class="beginner-hint">A <b>skill check</b> is when you try to do something uncertain — sneak (Stealth), persuade someone (Persuasion), notice something (Perception), recall lore (History), etc. The DM tells you what to roll or you suggest one that fits your action. Click <b>Roll</b> next to the matching skill — it rolls a d20 and adds your bonus. Higher = better. The two checkboxes are for <b>proficient</b> (you're trained in it) and <b>expertise</b> (double proficiency, rare) — check these based on your character sheet/class.</div>
+      <div class="beginner-hint">A <b>skill check</b> is when you try to do something uncertain — sneak (Stealth), persuade someone (Persuasion), notice something (Perception), recall lore (History), etc. The DM tells you what to roll or you suggest one that fits your action. Click <b>Roll</b> next to the matching skill to see your bonus, then roll your own d20 and add it. Higher = better. The two checkboxes are for <b>proficient</b> (you're trained in it) and <b>expertise</b> (double proficiency, rare) — check these based on your character sheet/class.</div>
     </div>
 
   </div>
@@ -386,35 +386,15 @@
       <h2>Attacks &amp; Spellcasting</h2>
       <div id="attacksList"></div>
       <button id="addAttackBtn">+ Add Attack/Spell</button>
-      <div class="beginner-hint">Fill in your weapons/spells once (name, attack bonus, damage). To attack: click <b>Roll</b> on the row — that's your to-hit roll. Tell the DM the total; if it meets or beats the target's AC, you hit. Then roll the damage dice listed (use the Dice Roller below, e.g. click d8 for "1d8") and add any damage bonus shown.</div>
+      <div class="beginner-hint">Fill in your weapons/spells once (name, attack bonus, damage). To attack: click <b>Roll</b> on the row to see your attack bonus, then roll your own d20 and add it — if the total meets or beats the target's AC, you hit. Then roll the listed damage dice yourself and add any damage bonus shown.</div>
     </div>
 
     <div class="panel">
-      <h2>Dice Roller</h2>
-      <div class="flexwrap">
-        <button data-die="4">d4</button>
-        <button data-die="6">d6</button>
-        <button data-die="8">d8</button>
-        <button data-die="10">d10</button>
-        <button data-die="12">d12</button>
-        <button data-die="20" class="primary">d20</button>
-        <button data-die="100">d100</button>
-      </div>
-      <div class="row" style="margin-top:6px;">
-        <div class="field" style="max-width:80px;"><label>Modifier</label><input id="rollMod" type="number" value="0"></div>
-        <div class="field" style="max-width:80px;"><label># of dice</label><input id="rollCount" type="number" value="1" min="1"></div>
-        <div class="field">
-          <label>d20 mode</label>
-          <div class="adv-toggle">
-            <button id="advNormal" class="active">Normal</button>
-            <button id="advAdv">Advantage</button>
-            <button id="advDis">Disadvantage</button>
-          </div>
-        </div>
-      </div>
+      <h2>Roll Reference</h2>
+      <div class="small">You're using your own physical dice. Click any <b>Roll</b> button on the sheet (ability, save, skill, attack, initiative) and the bonus to add shows up here.</div>
       <div class="dice-log" id="diceLog"></div>
       <button id="clearLogBtn" class="tiny-btn" style="margin-top:4px;">Clear Log</button>
-      <div class="beginner-hint">Most rolls in D&D are a d20 plus a modifier compared against a target number (an enemy's AC, or a DC the DM sets). <b>Advantage</b> means roll two d20s and take the higher (good for you); <b>Disadvantage</b> means take the lower (bad for you) — the DM will tell you when either applies.</div>
+      <div class="beginner-hint">Most rolls in D&D are a d20 plus a modifier, compared against a target number (an enemy's AC, or a DC the DM sets). <b>Advantage</b> means roll two d20s yourself and take the higher (good for you); <b>Disadvantage</b> means take the lower (bad for you) — the DM will tell you when either applies.</div>
     </div>
 
   </div>
@@ -537,7 +517,7 @@
       <li><b>Saving throw</b> — something is happening <i>to</i> you (a trap, a spell, poison) and you're trying to resist it. Roll d20 + that ability's save bonus, versus a DC the DM gives you.</li>
       <li><b>Attack roll</b> — you're trying to hit something in combat. Roll d20 + your attack bonus; if it meets or beats the target's Armor Class (AC), you hit and roll damage.</li>
     </ul>
-    <p>In every case: find the matching row on the sheet, click its <b>Roll</b> button, and tell the DM the total.</p>
+    <p>In every case: find the matching row on the sheet and click its <b>Roll</b> button to see the bonus — it shows up in the Roll Reference log. Then roll your own d20, add that bonus, and tell the DM the total.</p>
 
     <h3>Your turn in combat</h3>
     <ol>
@@ -574,8 +554,10 @@
     <h3>Hit Points</h3>
     <div class="radio-row">
       <label><input type="radio" name="hpMethod" id="hpMethodAvg" value="avg" checked> Take average</label>
-      <label><input type="radio" name="hpMethod" id="hpMethodRoll" value="roll"> Roll hit die</label>
-      <button id="rerollHpBtn" class="tiny-btn" style="display:none;">Reroll</button>
+      <label><input type="radio" name="hpMethod" id="hpMethodRoll" value="roll"> I'll roll my own hit die</label>
+    </div>
+    <div class="row" id="hpManualRollRow" style="display:none; align-items:center;">
+      <div class="field" style="max-width:100px;"><label id="hpManualRollLabel">You rolled</label><input id="hpManualRoll" type="number" min="1"></div>
     </div>
     <div class="hp-preview" id="hpGainPreview"></div>
 
@@ -745,15 +727,13 @@
    "attunementCount","f_attunementMax","attunementList",
    "f_compName","f_compType","f_compAC","f_compSpeed","f_compHpMax","f_compHpCurrent","f_compAtk","f_compDamage","f_compNotes",
    "c_cp","c_sp","c_ep","c_gp","c_pp","inventoryList",
-   "f_features","f_profs","f_notes","diceLog","rollMod","rollCount",
+   "f_features","f_profs","f_notes","diceLog",
    "f_inspiration","levelLogWrap","levelLog",
    "roundDisplay","initBonusDisplay","actionEcon","f_movementUsed","speedRef","effectsList",
    "resourcesList",
-   "levelUpModal","levelUpTitle","levelUpSubtitle","hpGainPreview","rerollHpBtn","levelUpNotes",
+   "levelUpModal","levelUpTitle","levelUpSubtitle","hpGainPreview","levelUpNotes",
    "beginnerModeToggle","guideModal","xpToNext","levelUpFlag"
   ].forEach(function(id){ el[id] = document.getElementById(id); });
-
-  var advMode = "normal"; // normal | adv | dis
 
   function renderCharSelect(){
     el.charSelect.innerHTML = "";
@@ -1119,55 +1099,17 @@
     if(rerender) renderAll();
   }
 
-  // ---------- dice ----------
-  function rollDie(sides){ return 1 + Math.floor(Math.random()*sides); }
-
+  // ---------- roll reference (physical dice — app just shows the modifier) ----------
   function logRoll(html){
     var line = document.createElement("div");
     line.innerHTML = html;
     el.diceLog.insertBefore(line, el.diceLog.firstChild);
   }
 
-  function doRoll(sides, modifier, label, count){
-    count = count || 1;
-    var results = [];
-    var usedAdv = (sides === 20 && advMode !== "normal");
-    var displayRolls = [];
-    var total = 0;
-    for(var i=0;i<count;i++){
-      if(usedAdv){
-        var r1 = rollDie(20), r2 = rollDie(20);
-        var chosen = advMode === "adv" ? Math.max(r1,r2) : Math.min(r1,r2);
-        displayRolls.push(r1 + "/" + r2 + "&rarr;" + chosen);
-        total += chosen;
-        results.push(chosen);
-      } else {
-        var r = rollDie(sides);
-        displayRolls.push(String(r));
-        total += r;
-        results.push(r);
-      }
-    }
-    var grand = total + Number(modifier || 0);
-    var critClass = "";
-    if(sides === 20 && count === 1){
-      if(results[0] === 20) critClass = "critgood";
-      if(results[0] === 1) critClass = "critbad";
-    }
-    var modStr = modifier ? (Number(modifier) >= 0 ? " +" + modifier : " " + modifier) : "";
-    logRoll(
-      "<span class='" + critClass + "'>" + (label ? ("<b>" + label + "</b>: ") : "") +
-      "d" + sides + " [" + displayRolls.join(", ") + "]" + modStr + " = <b>" + grand + "</b></span>"
-    );
-    return grand;
-  }
-
-  function setAdvMode(m){
-    advMode = m;
-    [el ,null];
-    document.getElementById("advNormal").classList.toggle("active", m==="normal");
-    document.getElementById("advAdv").classList.toggle("active", m==="adv");
-    document.getElementById("advDis").classList.toggle("active", m==="dis");
+  function showModifier(label, modifier){
+    var m = Number(modifier || 0);
+    var modStr = (m >= 0 ? "+" + m : String(m));
+    logRoll((label ? ("<b>" + label + "</b>: ") : "") + "add <b>" + modStr + "</b> to your roll");
   }
 
   // ---------- event wiring ----------
@@ -1394,7 +1336,7 @@
     document.getElementById("rollCompAtkBtn").addEventListener("click", function(){
       var c = getActive();
       var bonusNum = parseInt((c.companion.atk||"0").replace(/[^\-0-9]/g,""),10) || 0;
-      doRoll(20, bonusNum, (c.companion.name || "Companion") + " (to-hit)");
+      showModifier((c.companion.name || "Companion") + " (to-hit)", bonusNum);
     });
 
     ["c_cp","c_sp","c_ep","c_gp","c_pp"].forEach(function(id){
@@ -1444,18 +1386,6 @@
       save(); renderAll();
     });
 
-    // dice roller
-    document.querySelectorAll("[data-die]").forEach(function(btn){
-      btn.addEventListener("click", function(){
-        var sides = parseInt(btn.dataset.die,10);
-        var modifier = parseInt(el.rollMod.value,10) || 0;
-        var count = parseInt(el.rollCount.value,10) || 1;
-        doRoll(sides, modifier, "d" + sides + " roll", count);
-      });
-    });
-    document.getElementById("advNormal").addEventListener("click", function(){ setAdvMode("normal"); });
-    document.getElementById("advAdv").addEventListener("click", function(){ setAdvMode("adv"); });
-    document.getElementById("advDis").addEventListener("click", function(){ setAdvMode("dis"); });
     document.getElementById("clearLogBtn").addEventListener("click", function(){ el.diceLog.innerHTML = ""; });
 
     // inspiration
@@ -1467,7 +1397,7 @@
     document.getElementById("rollInitBtn").addEventListener("click", function(){
       var c = getActive();
       var initMod = c.initManual !== "" && c.initManual !== undefined ? Number(c.initManual) : mod(c.abilities.dex);
-      doRoll(20, initMod, "Initiative");
+      showModifier("Initiative", initMod);
     });
     document.getElementById("nextRoundBtn").addEventListener("click", function(){
       var c = getActive();
@@ -1562,22 +1492,27 @@
     });
 
     // level up modal
-    var pendingHpGain = 0;
+    var pendingHpGain = null;
     function hitDieSides(c){ return parseInt((c.hitDiceType || "d8").slice(1), 10) || 8; }
     function averageHpGain(c){
       var sides = hitDieSides(c);
       return Math.max(1, Math.floor(sides/2) + 1 + mod(c.abilities.con));
     }
-    function rolledHpGain(c){
-      var sides = hitDieSides(c);
-      return Math.max(1, rollDie(sides) + mod(c.abilities.con));
-    }
     function refreshHpPreview(){
       var c = getActive();
+      var sides = hitDieSides(c);
       var useRoll = document.getElementById("hpMethodRoll").checked;
-      el.rerollHpBtn.style.display = useRoll ? "inline-block" : "none";
+      document.getElementById("hpManualRollRow").style.display = useRoll ? "flex" : "none";
       if(useRoll){
-        if(!pendingHpGain) pendingHpGain = rolledHpGain(c);
+        document.getElementById("hpManualRollLabel").textContent = "You rolled (1-" + sides + ")";
+        var raw = document.getElementById("hpManualRoll").value;
+        if(raw === ""){
+          pendingHpGain = null;
+          el.hpGainPreview.textContent = "Enter what you rolled on your d" + sides + " above";
+          return;
+        }
+        var rolled = Math.max(1, Math.min(sides, parseInt(raw,10) || 1));
+        pendingHpGain = Math.max(1, rolled + mod(c.abilities.con));
       } else {
         pendingHpGain = averageHpGain(c);
       }
@@ -1589,22 +1524,23 @@
       el.levelUpTitle.textContent = "Level Up: " + c.level + " → " + (c.level + 1);
       el.levelUpSubtitle.textContent = "New proficiency bonus: " + fmtMod(profBonusForLevel(c.level + 1));
       document.getElementById("hpMethodAvg").checked = true;
-      pendingHpGain = 0;
+      document.getElementById("hpManualRoll").value = "";
+      pendingHpGain = null;
       el.levelUpNotes.value = "";
       refreshHpPreview();
       el.levelUpModal.classList.add("open");
     });
     document.getElementById("hpMethodAvg").addEventListener("change", refreshHpPreview);
-    document.getElementById("hpMethodRoll").addEventListener("change", function(){ pendingHpGain = 0; refreshHpPreview(); });
-    el.rerollHpBtn.addEventListener("click", function(){
-      var c = getActive();
-      pendingHpGain = rolledHpGain(c);
-      refreshHpPreview();
-    });
+    document.getElementById("hpMethodRoll").addEventListener("change", refreshHpPreview);
+    document.getElementById("hpManualRoll").addEventListener("input", refreshHpPreview);
     document.getElementById("cancelLevelUpBtn").addEventListener("click", function(){
       el.levelUpModal.classList.remove("open");
     });
     document.getElementById("confirmLevelUpBtn").addEventListener("click", function(){
+      if(pendingHpGain === null){
+        alert("Enter what you rolled on your hit die first.");
+        return;
+      }
       var c = getActive();
       var newLevel = c.level + 1;
       c.level = newLevel;
@@ -1649,7 +1585,7 @@
       if(t.dataset.rollability){
         var c = getActive();
         var m = mod(c.abilities[t.dataset.rollability]);
-        doRoll(20, m, t.dataset.rollability.toUpperCase() + " check");
+        showModifier(t.dataset.rollability.toUpperCase() + " check", m);
       }
     });
 
@@ -1668,7 +1604,7 @@
         var pb = profBonusForLevel(c.level);
         var s = c.saves[t.dataset.rollsave];
         var m = mod(c.abilities[t.dataset.rollsave]) + (s.prof?pb:0);
-        doRoll(20, m, SAVE_LABELS[t.dataset.rollsave] + " save");
+        showModifier(SAVE_LABELS[t.dataset.rollsave] + " save", m);
       }
     });
 
@@ -1692,7 +1628,7 @@
         var sk = c.skills[t.dataset.rollskill];
         var bonus = sk.expertise ? pb*2 : (sk.prof ? pb : 0);
         var m = mod(c.abilities[sdef.ab]) + bonus;
-        doRoll(20, m, sdef.label);
+        showModifier(sdef.label, m);
       }
     });
 
@@ -1741,7 +1677,7 @@
       } else if(t.dataset.atkRoll !== undefined){
         var a = c.attacks[parseInt(t.dataset.atkRoll,10)];
         var bonusNum = parseInt((a.bonus||"0").replace(/[^\-0-9]/g,""),10) || 0;
-        doRoll(20, bonusNum, (a.name || "Attack") + " (to-hit)");
+        showModifier((a.name || "Attack") + " (to-hit)", bonusNum);
       }
     });
 

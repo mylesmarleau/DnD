@@ -25,13 +25,13 @@ Turn on **Beginner Mode** in the top bar to show short explanations under each s
 - Class Resources tracker (Rage, Ki, Sorcery Points, Bardic Inspiration, etc.) with a reset rule per resource (manual / short rest / long rest)
 - Equipment: currency (CP/SP/EP/GP/PP) and an inventory list
 - Features & Traits, Proficiencies & Languages, and Personality/Notes sections
-- Built-in dice roller (d4–d100, multiple dice, modifiers, advantage/disadvantage) with a roll log
+- **Roll Reference** log: click any Roll button (ability, save, skill, attack, initiative) to see the modifier to add — you roll your own physical dice and add it yourself
 - Short Rest / Long Rest buttons that reset HP, hit dice, spell slots, and resources per the 5e rules
 - Manage multiple characters (New / Duplicate / Delete / switch), all stored locally in your browser
 
 ### Level Up system
 
-Click **Level Up** to walk through leveling up: choose to take the average HP gain or roll your hit die (with a reroll option), note any new features/ASI/feat gained (auto-appended to Features & Traits), and confirm. This updates your level, proficiency bonus, HP max/current, and hit dice, and logs the level-up in a **Level History** list on the Character panel.
+Click **Level Up** to walk through leveling up: choose to take the average HP gain, or roll your own physical hit die and type in the result, note any new features/ASI/feat gained (auto-appended to Features & Traits), and confirm. This updates your level, proficiency bonus, HP max/current, and hit dice, and logs the level-up in a **Level History** list on the Character panel.
 
 ### Artificer support
 
