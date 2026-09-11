@@ -236,9 +236,11 @@
       </div>
       <div class="row" style="margin-top:6px;">
         <div class="field"><label>XP</label><input id="f_xp" type="number" min="0"></div>
+        <div class="field"><label>To Next Level</label><input id="xpToNext" type="text" readonly></div>
         <div class="field"><label>Prof. Bonus</label><input id="f_profBonus" type="text" readonly></div>
       </div>
-      <div class="beginner-hint">Your <b>Proficiency Bonus</b> gets added to rolls for things you're trained in (attacks with weapons you're proficient with, skills you're proficient in, saving throws you're proficient in). It goes up as you level up — this app calculates it for you.</div>
+      <div id="levelUpFlag" style="display:none; margin-top:6px; color:var(--gold); font-weight:bold; font-size:0.85rem;">&#10024; You have enough XP to level up!</div>
+      <div class="beginner-hint">Your <b>Proficiency Bonus</b> gets added to rolls for things you're trained in (attacks with weapons you're proficient with, skills you're proficient in, saving throws you're proficient in). It goes up as you level up — this app calculates it for you. Update your XP whenever the DM awards it; the sheet will tell you when you've earned enough to level up.</div>
       <div class="row" style="margin-top:10px; align-items:center;">
         <label class="small"><input type="checkbox" id="f_inspiration" class="checkbox-title"> Inspiration</label>
         <div class="spacer"></div>
@@ -638,6 +640,8 @@
     INFUSION_TABLE.forEach(function(row){ if(level >= row.lvl) result = {known:row.known, items:row.items}; });
     return result;
   }
+  var XP_THRESHOLDS = [0,0,300,900,2700,6500,14000,23000,34000,48000,64000,
+    85000,100000,120000,140000,165000,195000,225000,265000,305000,355000];
 
   function defaultCharacter(name){
     var abilities = {}, saves = {}, skills = {};
@@ -746,7 +750,7 @@
    "roundDisplay","initBonusDisplay","actionEcon","f_movementUsed","speedRef","effectsList",
    "resourcesList",
    "levelUpModal","levelUpTitle","levelUpSubtitle","hpGainPreview","rerollHpBtn","levelUpNotes",
-   "beginnerModeToggle","guideModal"
+   "beginnerModeToggle","guideModal","xpToNext","levelUpFlag"
   ].forEach(function(id){ el[id] = document.getElementById(id); });
 
   var advMode = "normal"; // normal | adv | dis
@@ -1038,6 +1042,19 @@
     el.f_player.value = c.player;
     el.f_xp.value = c.xp;
     el.f_profBonus.value = fmtMod(profBonusForLevel(c.level));
+    if(c.level >= 20){
+      el.xpToNext.value = "Max level";
+      el.levelUpFlag.style.display = "none";
+    } else {
+      var xpNeeded = XP_THRESHOLDS[c.level + 1] - c.xp;
+      if(xpNeeded <= 0){
+        el.xpToNext.value = "0";
+        el.levelUpFlag.style.display = "block";
+      } else {
+        el.xpToNext.value = xpNeeded;
+        el.levelUpFlag.style.display = "none";
+      }
+    }
 
     renderAbilities(c);
     renderSaves(c);

@@ -14,7 +14,7 @@ Turn on **Beginner Mode** in the top bar to show short explanations under each s
 
 ## Features
 
-- Character info: name, class, level, race, background, alignment, XP, proficiency bonus (auto-calculated), inspiration tracker
+- Character info: name, class, level, race, background, alignment, XP (with an auto "XP to next level" readout and a level-up flag once you've earned enough), proficiency bonus (auto-calculated), inspiration tracker
 - Ability scores with auto-computed modifiers, and one-click ability checks
 - Saving throws and all 18 skills with proficiency/expertise toggles, auto-computed bonuses, and one-click rolls
 - Passive Perception (auto-computed)
