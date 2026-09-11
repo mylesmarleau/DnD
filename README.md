@@ -52,3 +52,7 @@ A dedicated panel for running your turns at the table:
 ## Backing up / moving between devices
 
 Use **Export** to download the active character as a JSON file, and **Import** to load a JSON file back in (on this device or any other browser). This is your safety net — local storage can be cleared by the browser, so back up before and after sessions if your character matters to you.
+
+## Included characters
+
+- `characters/nine.json` — Nine, a level 1 Artificer (Artillerist path). Open `index.html`, click **Import**, and select this file to load him in.

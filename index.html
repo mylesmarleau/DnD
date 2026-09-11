@@ -1025,7 +1025,7 @@
 
   function escapeAttr(v){
     if(v === undefined || v === null) return "";
-    return String(v).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
+    return String(v).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/'/g,"&#39;");
   }
 
   function renderAll(){
